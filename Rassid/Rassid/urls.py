@@ -26,4 +26,10 @@ urlpatterns = [
     path("api/notifications/", include("notifications.urls")),
     path("api/tickets/", include("tickets.urls")),
 
+    path("platform-admin/", include("platform_admin.urls")),
+    path("airport-admin/", include("airports.urls")),
+    path("operator/", include("flights.urls")),
+    path("passengers/", include("passengers.urls")),
+    path("tickets/", include("tickets.urls")),
+    path("", include("public.urls")),
 ]
