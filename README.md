@@ -224,5 +224,5 @@ Table:
 ## UML
 - Classes <img width="1190" height="1131" alt="ZLNRZjis47tNLmZxs29nyce4RjnjsXfejulQ_O0nEPQ9vOKOZhph5lttoc9M5YzkzaqwdCiPyl3mSs0WxerkmfEo7WXCApI4i6OcjUyPDyBPhVeRsmzDCwwqFslL7RdzfsdRxvLSjihovVCmmW-zsICjsy2aR7V10mFt8K744MMlKVw4_jATSDbAO6HbC5bV4waJw7GL56bbyTv9d8f6s3lYp" src="https://github.com/user-attachments/assets/aad63839-56fb-4288-8db6-2f0ac8489ada" />
 
-- Use Case<img width="540" height="1982" alt="IMG_3587" src="https://github.com/user-attachments/assets/ad7f35cf-ba33-4753-8cb0-3e105b264c3f" />
+- Use Case<img width="970" height="1982" alt="IMG_3587" src="https://github.com/user-attachments/assets/ad7f35cf-ba33-4753-8cb0-3e105b264c3f" />
 - Sequence <img width="970" height="1204" alt="IMG_3585" src="https://github.com/user-attachments/assets/aa04b7fd-7524-45bf-b260-53051e2770ef" />
