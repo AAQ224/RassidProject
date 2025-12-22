@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     AirportViewSet, AirportSubscriptionViewSet, SubscriptionRequestViewSet, 
     dashboard, employees_list, add_employee, airport_settings, 
-    request_subscription, approve_subscription
+    request_subscription, approve_subscription, edit_employee, delete_employee
 )
 
 router = DefaultRouter()
