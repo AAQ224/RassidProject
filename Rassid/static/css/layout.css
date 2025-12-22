@@ -1,0 +1,32 @@
+.glass-nav {
+    background: rgba(10, 42, 80, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    transition: top 0.35s ease, background 0.3s ease;
+}
+
+.glass-nav .navbar-brand {
+    letter-spacing: 0.06em;
+}
+
+.glass-nav .nav-link {
+    font-weight: 500;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.glass-nav .nav-link:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+.site-footer {
+    background: #0b3857;
+    color: #ffffff;
+    padding: 32px 0;
+    margin-top: 40px;
+}
+
+.site-footer small {
+    opacity: 0.7;
+}
