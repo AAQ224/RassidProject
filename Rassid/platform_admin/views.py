@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
-from datetime import timedelta
+from datetime import timedelta, datetime
 import random
 import string
 
@@ -20,6 +20,14 @@ User = get_user_model()
 
 def is_super_admin(user):
     return user.is_authenticated and user.is_superuser
+
+def redirect_back(request, fallback='platform_dashboard', anchor=''):
+    referer = request.META.get('HTTP_REFERER', fallback)
+    if anchor:
+        if '#' in referer:
+            referer = referer.split('#')[0]
+        return redirect(f"{referer}#{anchor}")
+    return redirect(referer)
 
 @login_required
 def admin_dashboard(request):
@@ -54,7 +62,9 @@ def admin_dashboard(request):
     latest_airports = Airport.objects.all().order_by('-id')[:5]
     admins = User.objects.filter(role='airport_admin')[:5]
     
+
     recent_tickets = Ticket.objects.select_related('airport').all().order_by('-createdAt')[:5]
+ 
 
     context = {
         "stats": stats,
@@ -241,11 +251,95 @@ def airport_details(request, id):
     if not is_super_admin(request.user):
         return redirect('public_home')
     airport = get_object_or_404(Airport, id=id)
-    subscription = AirportSubscription.objects.filter(airport=airport, status='active').first()
+    subscription = AirportSubscription.objects.filter(airport=airport).first()
     admin_user = User.objects.filter(airport_id=airport.id, role='airport_admin').first()
+    
     context = {
         'airport': airport,
         'subscription': subscription,
         'admin_user': admin_user,
     }
     return render(request, 'platform_admin/airport_details.html', context)
+
+@login_required
+def renew_subscription(request, id):
+    if not is_super_admin(request.user):
+        return redirect('public_home')
+        
+    subscription = get_object_or_404(AirportSubscription, airport_id=id)
+    
+    if subscription.expire_at:
+        subscription.expire_at = subscription.expire_at + timedelta(days=365)
+    else:
+        subscription.expire_at = datetime.now() + timedelta(days=365)
+        
+    subscription.status = 'active'
+    subscription.save()
+    
+    messages.success(request, f"Subscription renewed for {subscription.airport.name} successfully!")
+    return redirect_back(request, anchor='subscription-section')
+
+@login_required
+def toggle_subscription_status(request, id):
+    if not is_super_admin(request.user):
+        return redirect('public_home')
+    
+    airport = get_object_or_404(Airport, id=id)
+    subscription = AirportSubscription.objects.filter(airport=airport).first()
+    
+    if subscription:
+        if subscription.status == 'active':
+            subscription.status = 'suspended'
+            messages.warning(request, f"Subscription suspended for {airport.name}.")
+        else:
+            subscription.status = 'active'
+            messages.success(request, f"Subscription activated for {airport.name}.")
+        subscription.save()
+    else:
+        messages.error(request, "No subscription found for this airport.")
+    
+    return redirect_back(request, anchor='subscription-section')
+
+@login_required
+def admin_reset_password(request, user_id):
+    if not is_super_admin(request.user):
+        return redirect('public_home')
+    
+    target_user = get_object_or_404(User, id=user_id)
+    new_password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    target_user.set_password(new_password)
+    target_user.save()
+    
+    messages.success(request, f"Password reset for {target_user.email}. New Password: {new_password}")
+    return redirect_back(request, anchor='admin-section')
+
+@login_required
+def admin_toggle_user_access(request, user_id):
+    if not is_super_admin(request.user):
+        return redirect('public_home')
+    
+    target_user = get_object_or_404(User, id=user_id)
+    if target_user.is_active:
+        target_user.is_active = False
+        messages.warning(request, f"User {target_user.email} has been disabled.")
+    else:
+        target_user.is_active = True
+        messages.success(request, f"User {target_user.email} has been enabled.")
+    
+    target_user.save()
+    return redirect_back(request, anchor='admin-section')
+
+@login_required
+def admin_close_ticket(request, ticket_id):
+    if not is_super_admin(request.user):
+        return redirect('public_home')
+
+    try:
+        ticket = Ticket.objects.get(id=ticket_id)
+        ticket.status = 'closed'
+        ticket.save()
+        messages.success(request, f"Ticket #{ticket_id} has been closed.")
+    except Ticket.DoesNotExist:
+        messages.error(request, "Ticket not found.")
+
+    return redirect_back(request)

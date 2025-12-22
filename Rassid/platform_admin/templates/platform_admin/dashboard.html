@@ -1,4 +1,4 @@
- {% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
@@ -67,7 +67,7 @@
                     <td>{{ airport.city }}, {{ airport.country }}</td>
                     <td><span class="status-badge active">Active</span></td>
                     <td style="text-align: right;">
-                        <a href="#" class="btn-action">View</a>
+                        <a href="{% url 'admin_airport_details' airport.id %}" class="btn-action">View</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -75,7 +75,7 @@
         </table>
     </div>
 
-    <div class="glass-card mb-5">
+    <div id="admin-section" class="glass-card mb-5">
         <div class="card-header">
             <h3>Admin Management</h3>
         </div>
@@ -91,11 +91,18 @@
             <tbody>
                 {% for admin in admins %}
                 <tr>
-                    <td style="color: white;">Admin User</td> <td>{{ admin.email }}</td>
+                    <td style="color: white;">Admin User</td> 
+                    <td>{{ admin.email }}</td>
                     <td>{{ admin.airport.name }}</td>
                     <td style="text-align: right;">
-                        <button class="btn-action warning">Reset Pass</button>
-                        <button class="btn-action danger">Disable</button>
+                        <a href="{% url 'admin_reset_password' admin.id %}" 
+                           onclick="return confirm('Reset password for {{ admin.email }}? New password will be shown on screen.');" 
+                           class="btn-action warning">Reset Pass</a>
+                        
+                        <a href="{% url 'admin_toggle_user_access' admin.id %}" 
+                           class="btn-action {% if admin.is_active %}danger{% else %}success{% endif %}">
+                           {% if admin.is_active %}Disable{% else %}Enable{% endif %}
+                        </a>
                     </td>
                 </tr>
                 {% empty %}
@@ -137,9 +144,11 @@
                     </td>
                     <td>{{ ticket.status }}</td>
                     <td style="text-align: right;">
-                        <button class="btn-action">Assign</button>
-                        <button class="btn-action">Reply</button>
-                        <button class="btn-action danger">Close</button>
+                        <button class="btn-action" onclick="alert('Feature coming soon')">Assign</button>
+                        <button class="btn-action" onclick="alert('Feature coming soon')">Reply</button>
+                        <a href="{% url 'admin_close_ticket' ticket.id %}" 
+                           class="btn-action danger"
+                           onclick="return confirm('Close this ticket?');">Close</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -221,10 +230,12 @@
         cursor: pointer;
         transition: 0.2s;
         margin-left: 5px;
+        display: inline-block;
     }
     .btn-action:hover { background: white; color: black; }
     .btn-action.warning:hover { background: #f1c40f; color: black; border-color: #f1c40f; }
     .btn-action.danger:hover { background: #e74c3c; color: white; border-color: #e74c3c; }
+    .btn-action.success:hover { background: #2ecc71; color: white; border-color: #2ecc71; }
 
     .mb-5 { margin-bottom: 40px; }
 </style>
