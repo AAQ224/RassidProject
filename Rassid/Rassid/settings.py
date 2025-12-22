@@ -173,3 +173,7 @@ LOGIN_REDIRECT_URL = 'public_home'
 
 
 LOGOUT_REDIRECT_URL = 'login'
+
+# Stripe Configuration
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
