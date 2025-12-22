@@ -1,0 +1,92 @@
+.messages-toast-container {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 9999;
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.alert {
+    padding: 16px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    pointer-events: auto;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: relative;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+.alert::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.alert-success::before {
+    background: #22c55e;
+}
+
+.alert-error,
+.alert-danger {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.alert-error::before,
+.alert-danger::before {
+    background: #ef4444;
+}
+
+.alert-warning {
+    background: #fefce8;
+    color: #a16207;
+}
+
+.alert-warning::before {
+    background: #eab308;
+}
+
+.alert-info {
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+.alert-info::before {
+    background: #0ea5e9;
+}

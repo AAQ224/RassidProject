@@ -9,6 +9,9 @@ from django.db import transaction
 from datetime import timedelta, datetime
 import random
 import string
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.urls import reverse
 
 from airports.models import Airport, AirportSubscription, SubscriptionRequest
 from flights.models import Flight
@@ -59,7 +62,13 @@ def admin_dashboard(request):
         "system_uptime": system_uptime
     }
 
-    latest_airports = Airport.objects.all().order_by('-id')[:5]
+    latest_airports_qs = Airport.objects.all().order_by('-id')[:5]
+    latest_airports = []
+    for airport in latest_airports_qs:
+        sub = AirportSubscription.objects.filter(airport=airport).first()
+        airport.status = sub.status if sub else 'Inactive'
+        latest_airports.append(airport)
+    
     admins = User.objects.filter(role='airport_admin')[:5]
     
 
@@ -98,90 +107,65 @@ def approve_request(request, request_id):
         
     sub_req = get_object_or_404(SubscriptionRequest, id=request_id)
     
-    if sub_req.status != 'pending':
-        messages.warning(request, "This request has already been processed.")
+    # Allow approval if pending OR if already in payment pending (e.g. resending email)
+    if sub_req.status not in ['pending', 'approved_pending_payment']:
+        messages.warning(request, "This request has already been processed or is fully active.")
         return redirect('admin_requests_list')
 
     try:
+        # Check email availability early
         if User.objects.filter(email=sub_req.admin_email).exists():
-            messages.error(request, "A user with this email already exists.")
+            messages.error(request, f"Review Failed: A user with email {sub_req.admin_email} already exists.")
             return redirect('admin_requests_list')
 
-        airport = Airport.objects.create(
-            name=sub_req.airport_name,
-            code=sub_req.airport_code,
-            city=sub_req.city,
-            country=sub_req.country
-        )
-
-        password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-        
-        user = User.objects.create_user(
-            email=sub_req.admin_email,
-            password=password,
-            role='airport_admin',
-            airport_id=airport.id
-        )
-        
-        years = 1
-        if sub_req.selected_plan == '3_years':
-            years = 3
-        elif sub_req.selected_plan == '5_years':
-            years = 5
-            
-        start_date = timezone.now()
-        end_date = start_date + timedelta(days=365*years)
-        
-        AirportSubscription.objects.create(
-            airport=airport,
-            plan_type=sub_req.get_selected_plan_display(),
-            start_at=start_date,
-            expire_at=end_date,
-            status='active'
-        )
-
-        sub_req.status = 'approved'
+        # Update status to waiting for payment
+        sub_req.status = 'approved_pending_payment'
         sub_req.reviewed_by = request.user
         sub_req.save()
 
-        subject = "Welcome to RASSID Platform - Your Account is Ready!"
-        message = f"""
-Dear Partner,
+        # Build Checkout URL (Public URL)
+        # Assuming we add this URL path to airports/urls.py
+        checkout_url = request.build_absolute_uri(reverse('airport_payment_checkout', args=[sub_req.id]))
 
-Congratulations! Your airport {airport.name} has been approved.
+        # Send Payment Request Email
+        subject = "Application Approved - Activation Payment Required"
+        context = {
+            'airport_name': sub_req.airport_name,
+            'checkout_url': checkout_url
+        }
+        
+        html_message = render_to_string('emails/payment_request.html', context)
+        plain_message = strip_tags(html_message)
 
-Here are your login credentials:
-URL: {request.build_absolute_uri('/login/')}
-Email: {sub_req.admin_email}
-Password: {password}
-
-Please login and change your password immediately.
-
-Regards,
-RASSID Team
-"""
         try:
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [sub_req.admin_email], fail_silently=False)
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [sub_req.admin_email],
+                html_message=html_message,
+                fail_silently=False
+            )
             
             EmailLog.objects.create(
                 recipient=sub_req.admin_email,
-                subject="Account Approval",
+                subject="Payment Request",
                 status="Sent"
             )
-            messages.success(request, f"Airport {airport.name} approved and credentials sent!")
+            messages.success(request, f"Application for {sub_req.airport_name} approved! Payment request email sent to applicant.")
             
         except Exception as email_error:
             EmailLog.objects.create(
                 recipient=sub_req.admin_email,
-                subject="Account Approval",
+                subject="Payment Request",
                 status="Failed",
                 error_message=str(email_error)
             )
-            messages.warning(request, f"Airport approved, BUT email failed to send. Error: {email_error}")
+            messages.warning(request, f"Approved, but failed to send email: {email_error}")
         
     except Exception as e:
         transaction.set_rollback(True)
-        messages.error(request, f"Error: {str(e)}")
+        messages.error(request, f"System Error: {str(e)}")
         
     return redirect('admin_requests_list')
 
@@ -341,6 +325,23 @@ def admin_toggle_user_access(request, user_id):
         messages.success(request, f"User {target_user.email} has been enabled.")
     
     target_user.save()
+    return redirect_back(request, anchor='admin-section')
+
+@login_required
+def delete_user(request, user_id):
+    if not is_super_admin(request.user):
+        return redirect('public_home')
+        
+    target_user = get_object_or_404(User, id=user_id)
+    email = target_user.email
+    
+    if target_user == request.user:
+        messages.error(request, "You cannot delete your own account.")
+        return redirect_back(request, anchor='admin-section')
+
+    target_user.delete()
+    messages.success(request, f"User {email} has been permanently deleted.")
+    
     return redirect_back(request, anchor='admin-section')
 
 @login_required

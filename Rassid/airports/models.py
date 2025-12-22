@@ -17,7 +17,8 @@ class Airport(models.Model):
 class SubscriptionRequest(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
-        ('approved', 'Approved'),
+        ('approved_pending_payment', 'Approved (Payment Pending)'),
+        ('approved', 'Approved (Active)'),
         ('rejected', 'Rejected'),
     )
 
@@ -38,7 +39,7 @@ class SubscriptionRequest(models.Model):
     official_license = models.FileField(upload_to=airport_docs_path)
     commercial_record = models.FileField(upload_to=airport_docs_path, blank=True, null=True)
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

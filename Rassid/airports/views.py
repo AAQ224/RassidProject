@@ -11,6 +11,9 @@ from django.contrib import messages
 from django.urls import reverse
 from django.utils.crypto import get_random_string
 from django.utils import timezone
+from django.db import transaction
+from datetime import timedelta
+import stripe
 
 from .models import Airport, AirportSubscription, SubscriptionRequest
 from .serializers import AirportSerializer, AirportSubscriptionSerializer, SubscriptionRequestSerializer
@@ -277,3 +280,149 @@ def approve_subscription(request, request_id):
         messages.error(request, f"Error approving request: {str(e)}")
 
     return redirect('platform_admin_dashboard')
+
+def payment_checkout(request, request_id):
+    sub_req = get_object_or_404(SubscriptionRequest, id=request_id)
+    
+    if sub_req.status != 'approved_pending_payment':
+        if sub_req.status == 'approved':
+             return redirect('users:login')
+        messages.warning(request, "Invalid request status.")
+        return redirect('public_home')
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'unit_amount': 49900, # $499.00
+                    'product_data': {
+                        'name': f'Activation Fee - {sub_req.airport_name}',
+                        'description': f"Plan: {sub_req.get_selected_plan_display()}",
+                    },
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.build_absolute_uri(reverse('airport_payment_success', args=[sub_req.id])) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=request.build_absolute_uri(reverse('airport_payment_checkout', args=[sub_req.id])),
+        )
+        
+        return render(request, 'airports/payment_checkout.html', {
+            'request_obj': sub_req,
+            'session_id': checkout_session.id,
+            'stripe_public_key': settings.STRIPE_PUBLIC_KEY
+        })
+
+    except Exception as e:
+        messages.error(request, f"Error connecting to payment gateway: {str(e)}")
+        return redirect('public_home')
+
+@transaction.atomic
+def payment_success(request, request_id):
+    sub_req = get_object_or_404(SubscriptionRequest, id=request_id)
+
+    session_id = request.GET.get('session_id')
+
+    if not session_id:
+         messages.error(request, "No payment session detected.")
+         return redirect('airport_payment_checkout', request_id=request_id)
+
+    if sub_req.status != 'approved_pending_payment':
+        if sub_req.status == 'approved':
+             return redirect('users:login')
+        messages.warning(request, "This request is not awaiting payment.")
+        return redirect('public_home')
+        
+    try:
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        session = stripe.checkout.Session.retrieve(session_id)
+        
+        if session.payment_status != 'paid':
+             messages.error(request, "Payment not confirmed.")
+             return redirect('airport_payment_checkout', request_id=request_id)
+
+        if User.objects.filter(email=sub_req.admin_email).exists():
+            messages.error(request, "User with this email already exists.")
+            return redirect('public_home')
+
+        airport = Airport.objects.filter(code=sub_req.airport_code).first()
+        if not airport:
+            airport = Airport.objects.create(
+                name=sub_req.airport_name,
+                code=sub_req.airport_code,
+                city=sub_req.city,
+                country=sub_req.country
+            )
+
+        password = get_random_string(length=12)
+        user = User.objects.create_user(
+            email=sub_req.admin_email,
+            password=password,
+            role='airport_admin',
+            airport_id=airport.id
+        )
+
+        years = 1
+        if sub_req.selected_plan == '3_years':
+            years = 3
+        elif sub_req.selected_plan == '5_years':
+            years = 5
+            
+        start_date = timezone.now()
+        end_date = start_date + timedelta(days=365*years)
+
+        AirportSubscription.objects.create(
+            airport=airport,
+            plan_type=sub_req.get_selected_plan_display(),
+            start_at=start_date,
+            expire_at=end_date,
+            status='active'
+        )
+
+        sub_req.status = 'approved'
+        sub_req.save()
+
+        subject = "Welcome to RASSID - Workspace Activated"
+        login_url = request.build_absolute_uri('/login/')
+        
+        context = {
+            'airport_name': airport.name,
+            'email': sub_req.admin_email,
+            'password': password,
+            'login_url': login_url
+        }
+
+        html_message = render_to_string('emails/credentials_email.html', context)
+        plain_message = strip_tags(html_message)
+
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [sub_req.admin_email],
+            html_message=html_message,
+            fail_silently=False
+        )
+        
+        try:
+             from notifications.models import EmailLog
+             EmailLog.objects.create(
+                recipient=sub_req.admin_email,
+                subject="Account Credentials",
+                status="Sent"
+            )
+        except:
+            pass
+
+        return render(request, 'users/login.html', {
+            'messages': [f'Success! Account for {airport.name} is now active. Please check your email for credentials.']
+        })
+
+    except Exception as e:
+        transaction.set_rollback(True)
+        messages.error(request, f"Activation error: {str(e)}")
+        return redirect('airport_payment_checkout', request_id=request_id)

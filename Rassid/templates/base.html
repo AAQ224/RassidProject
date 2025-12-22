@@ -1,111 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RASSID</title>
 
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v=2.0">
     <link rel="stylesheet" href="{% static 'css/public.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toasts.css' %}">
 
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 
 <body>
 
-<nav id="navbar">
-    <div class="nav-container">
+    <nav id="navbar">
+        <div class="nav-container">
 
-        <div class="nav-left">
-            {% if user.is_authenticated and user.role == 'airport_admin' %}
+            <div class="nav-left">
+                {% if user.is_authenticated and user.role == 'airport_admin' %}
                 <a href="{% url 'airport_dashboard' %}" class="logo">
                     RASSID <span style="font-size: .5em; opacity:.7;">ADMIN</span>
                 </a>
-            {% else %}
+                {% else %}
                 <a href="{% url 'public_home' %}" class="logo">RASSID</a>
-            {% endif %}
-        </div>
+                {% endif %}
+            </div>
 
-        <div class="nav-center">
-            {% if user.is_authenticated and user.role == 'airport_admin' %}
+            <div class="nav-center">
+                {% if user.is_authenticated and user.role == 'airport_admin' %}
                 <a href="{% url 'airport_dashboard' %}" class="nav-link">Dashboard</a>
                 <a href="{% url 'airport_admin_employees' %}" class="nav-link">Employees</a>
                 <a href="{% url 'airport_settings' %}" class="nav-link">Settings</a>
-            {% else %}
+                {% else %}
                 <a href="{% url 'public_home' %}" class="nav-link">Overview</a>
                 <a href="{% url 'public_flights_list' %}" class="nav-link">Live Map</a>
                 <a href="{% url 'public_airports_list' %}" class="nav-link">Airports</a>
-            {% endif %}
-        </div>
+                {% endif %}
+            </div>
 
-        <div class="nav-right">
-            {% if user.is_authenticated %}
+            <div class="nav-right">
+                {% if user.is_authenticated %}
 
                 {% if user.is_superuser %}
-                    <a href="{% url 'admin_requests_list' %}" class="nav-link">
-                        <span class="material-symbols-outlined">inbox</span>
-                    </a>
-                    <a href="{% url 'platform_dashboard' %}"
-                       class="nav-link"
-                       style="color:#ff4757;font-weight:600;">
-                        Dashboard
-                    </a>
+                <a href="{% url 'admin_requests_list' %}" class="nav-link"
+                    style="display: flex; align-items: center; gap: 5px; margin-right: 15px;">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">inbox</span>
+                    <span>Requests</span>
+                </a>
+                <a href="{% url 'platform_dashboard' %}" class="nav-link"
+                    style="color: #ff4757; font-weight: 600; margin-right: 15px;">
+                    Dashboard
+                </a>
                 {% endif %}
 
                 <form action="{% url 'users:logout' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="nav-login-btn">Logout</button>
+                    <button type="submit" class="nav-login-btn" style="color: #0f172a !important;">Logout</button>
                 </form>
 
-            {% else %}
-                <a href="{% url 'users:login' %}" class="nav-login-btn">Login</a>
-            {% endif %}
+                {% else %}
+                <a href="{% url 'users:login' %}" class="nav-login-btn" style="color: #0f172a !important;">Login</a>
+                {% endif %}
+            </div>
+
+            <button class="mobile-toggle">
+                <span></span><span></span><span></span>
+            </button>
         </div>
+    </nav>
 
-        <button class="mobile-toggle">
-            <span></span><span></span><span></span>
-        </button>
-    </div>
-</nav>
-
-<div class="mobile-menu">
-    {% if user.is_authenticated and user.role == 'airport_admin' %}
+    <div class="mobile-menu">
+        {% if user.is_authenticated and user.role == 'airport_admin' %}
         <a href="{% url 'airport_dashboard' %}">Dashboard</a>
         <a href="{% url 'airport_admin_employees' %}">Employees</a>
         <a href="{% url 'airport_settings' %}">Settings</a>
-    {% else %}
+        {% else %}
         <a href="{% url 'public_home' %}">Overview</a>
         <a href="{% url 'public_flights_list' %}">Live Map</a>
         <a href="{% url 'public_airports_list' %}">Airports</a>
-    {% endif %}
+        {% endif %}
 
-    {% if user.is_superuser %}
+        {% if user.is_superuser %}
         <a href="{% url 'admin_requests_list' %}">Requests</a>
-        <a href="{% url 'platform_dashboard' %}">Dashboard</a>
-    {% endif %}
+        <a href="{% url 'platform_dashboard' %}" style="color: #ff4757;">Admin Dashboard</a>
+        {% endif %}
 
-    {% if user.is_authenticated %}
+        {% if user.is_authenticated %}
         <form action="{% url 'users:logout' %}" method="post">
             {% csrf_token %}
             <button type="submit" class="mobile-login">Logout</button>
         </form>
-    {% else %}
+        {% else %}
         <a href="{% url 'users:login' %}" class="mobile-login">Login</a>
-    {% endif %}
-</div>
+        {% endif %}
+    </div>
 
-<main>
-    {% block content %}{% endblock %}
-</main>
+    <main>
 
-<footer class="main-footer">
-    <p>&copy; 2025 RASSID System</p>
-</footer>
+        {% if messages %}
+        <div class="messages-toast-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <script>
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-20px)';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 4000);
+        </script>
+        {% endif %}
 
-<script src="{% static 'js/navbar.js' %}"></script>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2025 RASSID System</p>
+    </footer>
+
+    <script src="{% static 'js/navbar.js' %}"></script>
 </body>
+
 </html>

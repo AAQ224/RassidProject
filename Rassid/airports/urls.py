@@ -3,7 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     AirportViewSet, AirportSubscriptionViewSet, SubscriptionRequestViewSet, 
     dashboard, employees_list, add_employee, airport_settings, 
-    request_subscription, approve_subscription, edit_employee, delete_employee
+    request_subscription, approve_subscription, edit_employee, delete_employee,
+    payment_checkout, payment_success
 )
 
 router = DefaultRouter()
@@ -17,6 +18,9 @@ urlpatterns = [
     path('register/', request_subscription, name='request_subscription'),
 
     path('admin/approve/<int:request_id>/', approve_subscription, name='approve_subscription'),
+
+    path('payment/checkout/<int:request_id>/', payment_checkout, name='airport_payment_checkout'),
+    path('payment/success/<int:request_id>/', payment_success, name='airport_payment_success'),
 
     path("dashboard/", dashboard, name="airport_dashboard"),
     

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .header {
+            background: #0f172a;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .status-icon {
+            font-size: 48px;
+            color: #10b981;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .message {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #475569;
+            margin-bottom: 30px;
+        }
+
+        .btn-pay {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: #ffffff !important;
+            padding: 14px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-pay:hover {
+            background-color: #2563eb;
+        }
+
+        .footer {
+            background: #f1f5f9;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Application Approved</h1>
+        </div>
+        <div class="content">
+            <span class="status-icon">&#10004;</span>
+            <h2>Action Required</h2>
+            <p class="message">
+                Great news! Your application for <strong>{{ airport_name }}</strong> has been approved by our
+                administration.
+                <br><br>
+                To activate your account and receive your login credentials, please complete the activation fee payment.
+            </p>
+            <a href="{{ checkout_url }}" class="btn-pay">Pay Activation Fee</a>
+        </div>
+        <div class="footer">
+            &copy; 2025 RASSID Platform. All rights reserved.
+        </div>
+    </div>
+</body>
+
+</html>
