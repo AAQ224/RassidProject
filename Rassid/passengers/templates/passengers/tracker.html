@@ -105,11 +105,9 @@
         let remainingSeconds = 0;
 
         if (phase === 'pre_open') {
-            remainingSeconds = {{ seconds_to_open }
-        };
+            remainingSeconds = {{ seconds_to_open | default: 0 }};
         } else if (phase === 'boarding') {
-            remainingSeconds = {{ seconds_to_close }
-        };
+            remainingSeconds = {{ seconds_to_close | default: 0 }};
         }
 
         function pad(n) { return n < 10 ? '0' + n : n; }

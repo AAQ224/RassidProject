@@ -172,7 +172,6 @@ def fetch_flights(request):
          
     try:
         from .tasks import update_flights_task
-        from airports.models import Airport
         
         airport = Airport.objects.get(id=request.user.airport_id)
         

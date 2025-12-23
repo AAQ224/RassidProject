@@ -8,8 +8,17 @@
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-title">Flights Today</div>
-            <div class="stat-value">{{ today_flights|default:"0" }}</div>
+            <div class="stat-title">Total Flights</div>
+            <div class="stat-value">{{ total_flights|default:"0" }}</div>
+            <div style="margin-top: 0.5rem;">
+                <form method="POST" action="{% url 'sync_flights_data' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Sync
+                        API</button>
+                    <small style="display:block; margin-top:5px; color:var(--text-light); font-size:0.7rem;">(For
+                        Current Airport Only)</small>
+                </form>
+            </div>
         </div>
         <div class="stat-card">
             <div class="stat-title">Employees Count</div>
@@ -25,10 +34,36 @@
         </div>
     </div>
 
-    <div class="reports-grid">
-        <div class="chart-placeholder">Chart Placeholder 1</div>
-        <div class="chart-placeholder">Chart Placeholder 2</div>
-        <div class="chart-placeholder">Chart Placeholder 3</div>
+    <div class="glass-card mb-4">
+        <div class="card-header">
+            <h3>Upcoming Flights</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Flight</th>
+                        <th>Destination</th>
+                        <th>Departure</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for flight in upcoming_flights %}
+                    <tr>
+                        <td>{{ flight.flightNumber }}</td>
+                        <td>{{ flight.destination.code }}</td>
+                        <td>{{ flight.scheduledDeparture|date:"M d, H:i" }}</td>
+                        <td><span class="status-badge status-{{ flight.status|lower }}">{{ flight.status }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No upcoming flights found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="glass-card">
@@ -57,9 +92,9 @@
                     <td>{{ employee.role|default:"User" }}</td>
                     <td>
                         {% if employee.is_active %}
-                            Active
+                        Active
                         {% else %}
-                            Inactive
+                        Inactive
                         {% endif %}
                     </td>
                     <td class="text-end">
@@ -164,24 +199,18 @@
                 </tr>
             </thead>
             <tbody>
+                {% for payment in payments %}
                 <tr>
-                    <td>2024-11-15</td>
-                    <td>$299</td>
-                    <td>Premium</td>
-                    <td>Paid</td>
+                    <td>{{ payment.date|date:"Y-m-d" }}</td>
+                    <td>${{ payment.amount }}</td>
+                    <td>{{ payment.plan_name }}</td>
+                    <td>{{ payment.status }}</td>
                 </tr>
+                {% empty %}
                 <tr>
-                    <td>2024-10-15</td>
-                    <td>$299</td>
-                    <td>Premium</td>
-                    <td>Paid</td>
+                    <td colspan="4" class="text-center text-muted">No payment history found.</td>
                 </tr>
-                <tr>
-                    <td>2024-09-15</td>
-                    <td>$299</td>
-                    <td>Premium</td>
-                    <td>Paid</td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

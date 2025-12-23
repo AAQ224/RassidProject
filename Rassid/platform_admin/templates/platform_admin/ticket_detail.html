@@ -18,8 +18,7 @@
                 <h1 class="ticket-title">{{ ticket.title }}</h1>
                 <div class="ticket-meta">
                     <span class="cat-badge">{{ ticket.category }}</span>
-                    <span>Reported by <strong>{{ ticket.createdBy.get_full_name|default:ticket.createdBy.email
-                            }}</strong> from <strong>{{ ticket.airport.name }}</strong></span>
+                    <span>Reported by <strong>{{ ticket.createdBy.get_full_name|default:ticket.createdBy.email }}</strong> from <strong>{{ ticket.airport.name }}</strong></span>
                 </div>
             </div>
             <div class="ticket-status-col">
@@ -65,8 +64,7 @@
             <div class="comment-item {% if comment.user.is_superuser %}comment-superuser{% endif %}">
                 <div class="comment-header">
                     <div class="comment-author {% if comment.user.is_superuser %}comment-author-admin{% endif %}">
-                        {{ comment.user.get_full_name|default:comment.user.email }} {% if
-                        comment.user.is_superuser%}(Admin){% endif %}
+                        {{ comment.user.get_full_name|default:comment.user.email }} {% if comment.user.is_superuser%}(Admin){% endif %}
                     </div>
                     <div class="comment-date">{{ comment.commentedAt|date:"M d, H:i" }}</div>
                 </div>

@@ -55,3 +55,13 @@ class AirportSubscription(models.Model):
 
     def __str__(self):
         return f"{self.airport.code} - {self.plan_type}"
+
+class Payment(models.Model):
+    airport = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name='payments')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    plan_name = models.CharField(max_length=100)
+    status = models.CharField(max_length=20, default='Paid')
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.airport.code} - {self.amount} - {self.date}"

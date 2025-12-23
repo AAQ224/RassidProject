@@ -52,7 +52,16 @@ def get_airport_or_create(iata):
     return airport
 
 def save_flights_to_db(flights_data):
-    for flight in flights_data:
+    if isinstance(flights_data, dict):
+        flights_list = flights_data.get('data', [])
+    elif isinstance(flights_data, list):
+        flights_list = flights_data
+    else:
+        flights_list = []
+        
+    print(f"DEBUG: Processing {len(flights_list)} flights...")
+
+    for flight in flights_list:
         dep = flight.get("departure", {})
         arr = flight.get("arrival", {})
         airline = flight.get("airline", {})

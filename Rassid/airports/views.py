@@ -15,7 +15,8 @@ from django.db import transaction
 from datetime import timedelta
 import stripe
 
-from .models import Airport, AirportSubscription, SubscriptionRequest
+from .models import Airport, AirportSubscription, SubscriptionRequest, Payment
+from flights.services import flights_api
 from .serializers import AirportSerializer, AirportSubscriptionSerializer, SubscriptionRequestSerializer
 from .forms import AirportSignupForm
 from users.permissions import IsSuperAdmin
@@ -114,6 +115,7 @@ def dashboard(request):
         'upcoming_flights': upcoming_flights,
         'employees': employees, 
         'tickets': tickets,
+        'payments': Payment.objects.filter(airport=my_airport).order_by('-date'),
     }
     
     return render(request, "airports/dashboard.html", context)
@@ -402,6 +404,14 @@ def payment_success(request, request_id):
             status='active'
         )
 
+        # Create Payment Record
+        Payment.objects.create(
+            airport=airport,
+            amount=499.00, # Hardcoded activation fee for now, ideally comes from session/request
+            plan_name=sub_req.get_selected_plan_display(),
+            status='Paid'
+        )
+
         sub_req.status = 'approved'
         sub_req.save()
 
@@ -445,3 +455,24 @@ def payment_success(request, request_id):
         transaction.set_rollback(True)
         messages.error(request, f"Activation error: {str(e)}")
         return redirect('airport_payment_checkout', request_id=request_id)
+
+
+@login_required
+def sync_flights_data(request):
+    if request.method != "POST":
+         return redirect('airport_dashboard')
+         
+    if request.user.role != 'airport_admin' or not request.user.airport_id:
+        messages.error(request, "Permission denied.")
+        return redirect('public_home')
+        
+    airport = get_object_or_404(Airport, id=request.user.airport_id)
+    
+    try:
+        data = flights_api.fetch_flights(airport_code=airport.code)
+        flights_api.save_flights_to_db(data)
+        messages.success(request, f"Successfully synced flights for {airport.code}.")
+    except Exception as e:
+        messages.error(request, f"Error syncing flights: {str(e)}")
+        
+    return redirect('airport_dashboard')
