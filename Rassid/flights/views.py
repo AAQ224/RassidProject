@@ -46,7 +46,12 @@ def flights_list(request):
 
     today = timezone.now().date()
     
-    flights = Flight.objects.filter(origin_id=request.user.airport_id, status__iexact='scheduled').order_by("scheduledDeparture")
+    cutoff_time = timezone.now() - timezone.timedelta(hours=1)
+    
+    flights = Flight.objects.filter(
+        origin_id=request.user.airport_id, 
+        scheduledDeparture__gte=cutoff_time
+    ).exclude(status__iexact='landed').exclude(status__iexact='cancelled').order_by("scheduledDeparture")
     
     destinations = Airport.objects.filter(
         id__in=flights.values_list('destination_id', flat=True).distinct()
@@ -70,8 +75,11 @@ def flights_list(request):
     my_tickets = Ticket.objects.filter(createdBy=request.user).order_by('-createdAt')
     ticket_form = TicketForm()
 
+    total_flights_count = flights.count()
+
     return render(request, "flights/operator/flights_list.html", {
         "flights": flights,
+        "total_flights_count": total_flights_count,
         "search_query": search_query,
         "destinations": destinations,
         "selected_destination": int(destination_id) if destination_id else None,
@@ -114,6 +122,7 @@ def edit_flight(request, pk):
         if dep_time:
             flight.scheduledDeparture = dep_time
         
+        flight.is_protected = True
         flight.save()
 
         gate_code = request.POST.get('gateCode')

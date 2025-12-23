@@ -11,6 +11,8 @@ class Flight(models.Model):
     origin = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name='origin_flights')
     destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name='destination_flights')
 
+    is_protected = models.BooleanField(default=False, help_text="If True, API updates will not overwrite this flight's data.")
+
     def __str__(self):
         return self.flightNumber
 

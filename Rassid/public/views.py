@@ -25,7 +25,27 @@ def flights_list(request):
     # Get IDs of airports that have an admin (managed airports)
     managed_airport_ids = User.objects.filter(role='airport_admin').values_list('airport_id', flat=True).distinct()
     
-    flights = Flight.objects.filter(origin_id__in=managed_airport_ids, status__iexact='scheduled').select_related('origin', 'destination').prefetch_related('gateassignment_set').order_by("scheduledDeparture")
+    from django.utils import timezone
+    from django.db.models import Q
+    
+    cutoff_time = timezone.now() - timezone.timedelta(hours=1)
+    
+    # Logic:
+    # 1. Always show 'active' flights (flying now).
+    # 2. Show 'scheduled'/'delayed'/etc if they are in the future or departed recently (<1h ago).
+    # 3. Exclude 'landed' and 'cancelled' from the generic catch-all, but if 'active' is somehow flagged landed (unlikely), strict active takes precedence or we can exclude landed globally.
+    # actually, simplest is: (Active) OR (Future/Recent AND NOT Landed AND NOT Cancelled)
+    
+    flights = Flight.objects.filter(
+        origin_id__in=managed_airport_ids
+    ).filter(
+        Q(status__iexact='active') |
+        (
+            Q(scheduledDeparture__gte=cutoff_time) & 
+            ~Q(status__iexact='landed') & 
+            ~Q(status__iexact='cancelled')
+        )
+    ).select_related('origin', 'destination').prefetch_related('gateassignment_set').order_by("scheduledDeparture")
 
     # Search filter
     search_query = request.GET.get('search')

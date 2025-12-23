@@ -9,7 +9,8 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <h1>Flight Operations</h1>
-                <p>Manage your airport's departing flights</p>
+                <p>Manage your airport's departing flights <span
+                        style="background: #e2e8f0; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; color: #475569; margin-left: 8px;">{{total_flights_count }} Flights</span></p>
             </div>
             <a href="{% url 'operator_fetch_flights' %}" class="btn-primary">
                 <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">sync</span>
@@ -156,30 +157,36 @@
                                 </div>
                             </div>
                             {% if ticket.status == 'Open' %}
-                                <span class="badge status-{{ ticket.status|lower }}" style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; font-weight: 600; background:#e0f2fe; color:#0284c7;">
-                                    {{ ticket.status }}
-                                </span>
+                            <span class="badge status-{{ ticket.status|lower }}"
+                                style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; font-weight: 600; background:#e0f2fe; color:#0284c7;">
+                                {{ ticket.status }}
+                            </span>
                             {% elif ticket.status == 'Escalated' %}
-                                <span class="badge status-{{ ticket.status|lower }}" style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; font-weight: 600; background:#f3e8ff; color:#9333ea;">
-                                    {{ ticket.status }}
-                                </span>
+                            <span class="badge status-{{ ticket.status|lower }}"
+                                style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; font-weight: 600; background:#f3e8ff; color:#9333ea;">
+                                {{ ticket.status }}
+                            </span>
                             {% elif ticket.status == 'Rejected' %}
-                                <span class="badge status-{{ ticket.status|lower }}" style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; font-weight: 600; background:#fee2e2; color:#dc2626;">
-                                    {{ ticket.status }}
-                                </span>
+                            <span class="badge status-{{ ticket.status|lower }}"
+                                style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; font-weight: 600; background:#fee2e2; color:#dc2626;">
+                                {{ ticket.status }}
+                            </span>
                             {% else %}
-                                <span class="badge status-{{ ticket.status|lower }}" style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; font-weight: 600; background:#f1f5f9; color:#475569;">
-                                    {{ ticket.status }}
-                                </span>
+                            <span class="badge status-{{ ticket.status|lower }}"
+                                style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; font-weight: 600; background:#f1f5f9; color:#475569;">
+                                {{ ticket.status }}
+                            </span>
                             {% endif %}
                         </div>
                         <div style="display: flex; gap: 10px; font-size: 0.85em;">
                             <span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px;">{{
                                 ticket.category }}</span>
                             {% if ticket.priority == 'High' %}
-                                <span style="padding: 2px 8px; border-radius: 4px; background: #fee2e2; color:#ef4444;">{{ ticket.priority }}</span>
+                            <span style="padding: 2px 8px; border-radius: 4px; background: #fee2e2; color:#ef4444;">{{
+                                ticket.priority }}</span>
                             {% else %}
-                                <span style="padding: 2px 8px; border-radius: 4px; background: #f1f5f9; color:#475569;">{{ ticket.priority }}</span>
+                            <span style="padding: 2px 8px; border-radius: 4px; background: #f1f5f9; color:#475569;">{{
+                                ticket.priority }}</span>
                             {% endif %}
                         </div>
                     </div>

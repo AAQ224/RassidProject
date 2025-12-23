@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content {
+            padding: 30px;
+            color: #334155;
+            line-height: 1.6;
+            text-align: right;
+        }
+
+        .flight-info {
+            background-color: #f8fafc;
+            border-right: 4px solid #10b981;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #10b981;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .footer {
+            background-color: #f1f5f9;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>أهلاً بك على متن رحلتنا!</h1>
+        </div>
+        <div class="content">
+            <p>عزيزي/عزيزتي {{ passenger_name }}،</p>
+            <p> رحلة رقم <strong>{{ flight_number }}</strong>.</p>
+            <p>نحن هنا لمراقبة رحلتك وضمان راحتك.</p>
+
+            <div class="flight-info">
+                <p><strong>رقم الرحلة:</strong> {{ flight_number }}</p>
+                <p><strong>المسار:</strong> {{ origin }} إلى {{ destination }}</p>
+                <p><strong>وقت المغادرة:</strong> {{ departure_time }}</p>
+            </div>
+
+            <p>يمكنك متابعة حالة رحلتك ومعلومات البوابة والمزيد عبر رابط التتبع الخاص بك أدناه:</p>
+
+            <center>
+                <a href="{{ tracking_link }}" class="btn">تتبع رحلتي</a>
+            </center>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 Rassid (راصد). جميع الحقوق محفوظة.</p>
+        </div>
+    </div>
+</body>
+
+</html>

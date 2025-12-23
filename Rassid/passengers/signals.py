@@ -91,3 +91,58 @@ def gate_assigned(sender, instance, created, **kwargs):
         title_ar=f"تحديث معلومات البوابة",
         desc_ar=f"البوابة: {instance.gateCode}، الصالة: {instance.terminal}. الصعود في {boarding_time_str}."
     )
+
+@receiver(post_save, sender=PassengerFlight)
+def booking_created(sender, instance, created, **kwargs):
+    if created:
+        passenger = instance.passenger
+        flight = instance.flight
+        lang = passenger.preferredLanguage
+        
+        token = passenger.trackingToken
+        tracking_link = f"http://127.0.0.1:8000/passengers/track/{token}/"
+        
+        try:
+            boarding_time = flight.scheduledDeparture.strftime('%H:%M')
+        except:
+            boarding_time = str(flight.scheduledDeparture)
+
+        if lang == 'ar':
+            subject = "تأكيد الحجز - راصد"
+            template = 'emails/booking_confirmation_ar.html'
+            context = {
+                'passenger_name': passenger.fullName,
+                'flight_number': flight.flightNumber,
+                'origin': flight.origin.code,
+                'destination': flight.destination.code,
+                'departure_time': boarding_time,
+                'tracking_link': tracking_link
+            }
+        else:
+            subject = "Booking Confirmation - Rassid"
+            template = 'emails/booking_confirmation_en.html'
+            context = {
+                'passenger_name': passenger.fullName,
+                'flight_number': flight.flightNumber,
+                'origin': flight.origin.code,
+                'destination': flight.destination.code,
+                'departure_time': boarding_time,
+                'tracking_link': tracking_link
+            }
+
+        html_message = render_to_string(template, context)
+        plain_message = strip_tags(html_message)
+        
+        try:
+            print(f"Sending booking confirmation to {passenger.email}...")
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [passenger.email],
+                html_message=html_message,
+                fail_silently=False
+            )
+            print("Booking email sent.")
+        except Exception as e:
+            print(f"Failed to send booking email to {passenger.email}: {e}")

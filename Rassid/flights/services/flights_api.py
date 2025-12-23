@@ -61,7 +61,7 @@ def save_flights_to_db(flights_data):
         
     print(f"DEBUG: Processing {len(flights_list)} flights...")
 
-    for flight in flights_list:
+    for index, flight in enumerate(flights_list):
         dep = flight.get("departure", {})
         arr = flight.get("arrival", {})
         airline = flight.get("airline", {})
@@ -72,6 +72,15 @@ def save_flights_to_db(flights_data):
             # Prefer explicit city if available (rare in this API subset without paid)
             # Fallback to Airport Name. Timezone is too broad (e.g. Asia/Riyadh covers DMM, JED)
             return data.get("airport") or data.get("iata") or "Unknown"
+
+        origin, _ = Airport.objects.update_or_create(
+            code=dep.get("iata"),
+            defaults={
+                "name": dep.get("airport") or dep.get("iata"),
+                "city": get_city_or_name(dep),
+                "country": dep.get("country") or "Unknown",
+            }
+        )
 
         origin, _ = Airport.objects.update_or_create(
             code=dep.get("iata"),
@@ -100,8 +109,24 @@ def save_flights_to_db(flights_data):
             "destination": destination,
         }
 
-        Flight.objects.update_or_create(
-            flightNumber=f_info.get("iata"),
-            defaults=parsed
-        )
+        # Try to get existing flight
+        flight_obj = Flight.objects.filter(flightNumber=f_info.get("iata")).first()
+        
+        if flight_obj:
+            if not flight_obj.is_protected:
+                # Update allowed
+                for key, value in parsed.items():
+                    setattr(flight_obj, key, value)
+                flight_obj.save()
+            else:
+                # Protected: Do not update fields, but we might want to log it or do nothing.
+                # However, let's keep Gate logic separate if we had it here, but we don't.
+                pass
+        else:
+            # Create new
+            Flight.objects.create(
+                flightNumber=f_info.get("iata"),
+                # Unpack parsed
+                **parsed
+            )
     

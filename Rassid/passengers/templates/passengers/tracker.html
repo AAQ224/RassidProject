@@ -22,8 +22,7 @@
             <div class="flight-number">Flight Number: {{ flight.flightNumber }}</div>
             <div class="flight-header">
                 <div class="flight-route">
-                    {{ flight.origin.code }} <span style="color:var(--text-light)">→</span> {{ flight.destination.code
-                    }}
+                    {{ flight.origin.code }} <span style="color:var(--text-light)">→</span> {{ flight.destination.code }}
                 </div>
                 <div class="status-badge status-{{ flight.status|lower }}">
                     Status: {{ flight.status }}
@@ -105,9 +104,11 @@
         let remainingSeconds = 0;
 
         if (phase === 'pre_open') {
-            remainingSeconds = {{ seconds_to_open | default: 0 }};
+            remainingSeconds = {{ seconds_to_open |default: 0 }
+        };
         } else if (phase === 'boarding') {
-            remainingSeconds = {{ seconds_to_close | default: 0 }};
+            remainingSeconds = {{ seconds_to_close |default: 0 }
+        };
         }
 
         function pad(n) { return n < 10 ? '0' + n : n; }

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content {
+            padding: 30px;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .flight-info {
+            background-color: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .footer {
+            background-color: #f1f5f9;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome Aboard!</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ passenger_name }},</p>
+            <p>Your flight <strong>{{ flight_number }}</strong> has been confirmed. We are excited to have you fly with
+                us.</p>
+
+            <div class="flight-info">
+                <p><strong>Flight:</strong> {{ flight_number }}</p>
+                <p><strong>Route:</strong> {{ origin }} to {{ destination }}</p>
+                <p><strong>Departure:</strong> {{ departure_time }}</p>
+            </div>
+
+            <p>You can track your flight status, gate information, and more using your personal tracking link below:</p>
+
+            <center>
+                <a href="{{ tracking_link }}" class="btn">Track My Flight</a>
+            </center>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 Rassid. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+
+</html>
