@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="header-section">
+        <h1 class="page-title">Flight Reports</h1>
+        <p class="page-subtitle">Detailed analytics and performance metrics for {{ airport.code }}</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-title">Total Updates</div>
+            <div class="stat-value">{{ total_updates }}</div>
+            <small style="color: #888;">changes recorded</small>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Avg Gate Time</div>
+            <div class="stat-value">{{ avg_gate_time }}</div>
+            <small style="color: #888;">boarding duration</small>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Notification Success</div>
+            <div class="stat-value" style="color: #2ecc71;">{{ notification_success_rate }}%</div>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div class="card-header">
+            <h3>Most Changed Flights</h3>
+        </div>
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Flight Number</th>
+                    <th>Destination</th>
+                    <th>Departure Time</th>
+                    <th>Total Updates</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in most_changed_flights %}
+                <tr>
+                    <td>{{ flight.flightNumber }}</td>
+                    <td>{{ flight.destination.code }}</td>
+                    <td>{{ flight.scheduledDeparture|date:"M d, H:i" }}</td>
+                    <td>
+                        <span class="code-badge">{{ flight.changes_count }}</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center" style="color: #888;">No flight history available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <a href="{% url 'airport_dashboard' %}" class="back-link">
+            <span class="material-symbols-outlined">arrow_back</span> Back to Dashboard
+        </a>
+    </div>
+
+</div>
+{% endblock %}

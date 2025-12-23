@@ -107,15 +107,52 @@ def dashboard(request):
         scheduledDeparture__gte=now
     ).order_by('scheduledDeparture')[:5]
 
+    try:
+        from notifications.models import EmailLog
+        email_logs = EmailLog.objects.filter(recipient=request.user.email)
+        total_logs = email_logs.count()
+        failed_logs = email_logs.filter(status='Failed').count()
+        
+        if total_logs > 0:
+            success_rate = int(((total_logs - failed_logs) / total_logs) * 100)
+        else:
+            success_rate = 0 # Default if no logs
+            
+        notification_success_rate = f"{success_rate}%"
+        notification_failed_count = failed_logs
+    except ImportError:
+        notification_success_rate = "0%"
+        notification_failed_count = 0
+
+    active_subscription = AirportSubscription.objects.filter(airport=my_airport, status='active').first()
+    
+    # Calculate usage percent
+    employees_count = employees.count()
+    if active_subscription and active_subscription.max_employees > 0:
+        usage_percent = int((employees_count / active_subscription.max_employees) * 100)
+    else:
+        usage_percent = 0
+    
+    payment_history = SubscriptionRequest.objects.filter(
+        admin_email=request.user.email,
+        airport_code=my_airport.code
+    ).order_by('-created_at')
+
     context = {
         'airport': my_airport,
         'total_flights': total_flights,
         'today_flights': today_flights,
         'total_tickets': total_tickets,
         'upcoming_flights': upcoming_flights,
-        'employees': employees, 
+        'employees': employees,
+        'employees_count': employees_count,
+        'usage_percent': usage_percent,
+        'active_subscription': active_subscription, 
         'tickets': tickets,
-        'payments': Payment.objects.filter(airport=my_airport).order_by('-date'),
+        'payments': payment_history,
+        'notification_success_rate': notification_success_rate,
+        'notification_failed_count': notification_failed_count,
+        'active_subscription': active_subscription,
     }
     
     return render(request, "airports/dashboard.html", context)
@@ -138,6 +175,7 @@ def add_employee(request):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         phone_number = request.POST.get('phone_number')
+        role = request.POST.get('role', 'operator')
 
         if User.objects.filter(email=email).exists():
             messages.error(request, "Email already exists.")
@@ -150,7 +188,7 @@ def add_employee(request):
                 first_name=first_name,
                 last_name=last_name,
                 phone_number=phone_number,
-                role='operator',
+                role=role,
                 airport_id=request.user.airport_id
             )
             messages.success(request, "Employee added successfully.")
@@ -176,6 +214,8 @@ def edit_employee(request, employee_id):
         employee.last_name = request.POST.get('last_name')
         employee.email = request.POST.get('email')
         employee.phone_number = request.POST.get('phone_number')
+        employee.role = request.POST.get('role', 'operator')
+        employee.is_active = request.POST.get('is_active') == 'on'
         
         employee.save()
         messages.success(request, "Employee updated successfully.")
@@ -214,12 +254,28 @@ def delete_employee(request, employee_id):
 def airport_settings(request):
     if request.user.role != 'airport_admin':
         return redirect('public_home')
+        
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone_number = request.POST.get('phone_number')
+        
+        user = request.user
+        user.first_name = first_name
+        user.last_name = last_name
+        user.phone_number = phone_number
+        user.save()
+        
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('airport_settings')
+
     airport_id = request.user.airport_id
     airport = None
     subscription = None
     if airport_id:
         airport = get_object_or_404(Airport, id=airport_id)
         subscription = AirportSubscription.objects.filter(airport=airport).first()
+    
     return render(request, "airports/airport_settings.html", {
         "airport": airport,
         "subscription": subscription,
@@ -404,10 +460,9 @@ def payment_success(request, request_id):
             status='active'
         )
 
-        # Create Payment Record
         Payment.objects.create(
             airport=airport,
-            amount=499.00, # Hardcoded activation fee for now, ideally comes from session/request
+            amount=499.00,
             plan_name=sub_req.get_selected_plan_display(),
             status='Paid'
         )
@@ -474,5 +529,149 @@ def sync_flights_data(request):
         messages.success(request, f"Successfully synced flights for {airport.code}.")
     except Exception as e:
         messages.error(request, f"Error syncing flights: {str(e)}")
+        
+    return redirect('airport_dashboard')
+
+@login_required
+def renew_subscription(request):
+    if request.user.role != 'airport_admin' or not request.user.airport_id:
+        return redirect('public_home')
+
+    if request.method == 'POST':
+        plan = request.POST.get('plan', '1_year')
+        airport = get_object_or_404(Airport, id=request.user.airport_id)
+        
+        last_req = SubscriptionRequest.objects.filter(admin_email=request.user.email).last()
+        
+        new_req = SubscriptionRequest.objects.create(
+            airport_name=airport.name,
+            airport_code=airport.code,
+            country=airport.country,
+            city=airport.city,
+            admin_email=request.user.email,
+            admin_phone=request.user.phone_number or "0000000000",
+            selected_plan=plan,
+            status='approved_pending_payment',
+            official_license=last_req.official_license if last_req else None 
+        )
+        
+        return redirect('airport_payment_checkout', request_id=new_req.id)
+
+    return render(request, 'airports/renew_subscription.html')
+
+@login_required
+def flight_reports(request):
+    if request.user.role != 'airport_admin' or not request.user.airport_id:
+        return redirect('public_home')
+        
+    airport = get_object_or_404(Airport, id=request.user.airport_id)
+    
+    from flights.models import FlightStatusHistory, GateAssignment, Flight
+    from django.db.models import Count, Avg, F, DurationField, ExpressionWrapper
+    
+    my_flights = Flight.objects.filter(origin=airport)
+    total_updates = FlightStatusHistory.objects.filter(flight__in=my_flights).count()
+    
+    gate_assignments = GateAssignment.objects.filter(flight__in=my_flights, releasedAt__isnull=False)
+    if gate_assignments.exists():
+        avg_duration = gate_assignments.annotate(
+            duration=ExpressionWrapper(F('releasedAt') - F('assignedAt'), output_field=DurationField())
+        ).aggregate(Avg('duration'))['duration__avg']
+        
+        if avg_duration:
+            total_seconds = int(avg_duration.total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            avg_gate_time = f"{hours}h {minutes}m"
+        else:
+            avg_gate_time = "0h 0m"
+    else:
+        avg_gate_time = "N/A"
+
+    try:
+        from notifications.models import EmailLog
+        email_logs = EmailLog.objects.filter(recipient=request.user.email)
+        total_logs = email_logs.count()
+        failed_logs = email_logs.filter(status='Failed').count()
+        if total_logs > 0:
+            success_rate = int(((total_logs - failed_logs) / total_logs) * 100)
+        else:
+            success_rate = 0
+    except:
+        success_rate = 0
+        
+    most_changed_flights = my_flights.annotate(
+        changes_count=Count('flightstatushistory')
+    ).order_by('-changes_count')[:5]
+
+    context = {
+        'airport': airport,
+        'total_updates': total_updates,
+        'avg_gate_time': avg_gate_time,
+        'notification_success_rate': success_rate,
+        'most_changed_flights': most_changed_flights
+    }
+    
+    return render(request, 'airports/flight_reports.html', context)
+
+@login_required
+def notification_insights(request):
+    if request.user.role != 'airport_admin' or not request.user.airport_id:
+        return redirect('public_home')
+        
+    try:
+        from notifications.models import EmailLog
+        from django.utils import timezone
+        
+        logs = EmailLog.objects.filter(recipient=request.user.email).order_by('-sent_at')[:50]
+        
+        today = timezone.now().date()
+        dates = []
+        delivery_rates = []
+        failed_counts = []
+        
+        for i in range(6, -1, -1):
+            date = today - timedelta(days=i)
+            day_logs = EmailLog.objects.filter(
+                recipient=request.user.email, 
+                sent_at__date=date
+            )
+            total = day_logs.count()
+            failed = day_logs.filter(status='Failed').count()
+            sent = total - failed
+            
+            rate = int((sent / total) * 100) if total > 0 else 0
+            
+            dates.append(date.strftime("%b %d"))
+            delivery_rates.append(rate)
+            failed_counts.append(failed)
+            
+    except ImportError:
+        logs = []
+        dates = []
+        delivery_rates = []
+        failed_counts = []
+
+    context = {
+        'logs': logs,
+        'dates': dates,
+        'delivery_rates': delivery_rates,
+        'failed_counts': failed_counts
+    }
+    return render(request, 'airports/notification_insights.html', context)
+
+@login_required
+def cancel_subscription_request(request, request_id):
+    if request.user.role != 'airport_admin':
+        return redirect('public_home')
+        
+    sub_request = get_object_or_404(SubscriptionRequest, id=request_id, admin_email=request.user.email)
+    
+    if sub_request.status in ['pending', 'approved_pending_payment']:
+        sub_request.status = 'rejected' # Mark as rejected/cancelled
+        sub_request.save()
+        messages.success(request, "Request cancelled successfully.")
+    else:
+        messages.error(request, "Cannot cancel this request active or already processed.")
         
     return redirect('airport_dashboard')

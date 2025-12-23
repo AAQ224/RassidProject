@@ -2,55 +2,126 @@
 {% load static %}
 
 {% block content %}
-<div class="container" style="padding-top: 50px; padding-bottom: 50px; max-width: 900px;">
+<div class="container admin-page-container">
 
-    <h2 style="color: white; font-weight: 800; margin-bottom: 30px;">Settings</h2>
-
-    <div class="glass-card" style="background: #1e2124; padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px;">
-        <h4 style="color: #00f260; margin-bottom: 20px;">Airport Information</h4>
-        
-        <div class="row mb-3">
-            <div class="col-md-4" style="color: #888;">Airport Name</div>
-            <div class="col-md-8" style="color: white; font-weight: bold;">{{ airport.name }}</div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-md-4" style="color: #888;">IATA Code</div>
-            <div class="col-md-8" style="color: white;">
-                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px;">{{ airport.code }}</span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4" style="color: #888;">Location</div>
-            <div class="col-md-8" style="color: white;">{{ airport.city }}, {{ airport.country }}</div>
-        </div>
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark">Settings</h2>
     </div>
 
-    <div class="glass-card" style="background: #1e2124; padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
-        <h4 style="color: #0575e6; margin-bottom: 20px;">Subscription Plan</h4>
-        
-        <div class="row mb-3">
-            <div class="col-md-4" style="color: #888;">Current Plan</div>
-            <div class="col-md-8" style="color: white;">
-                {% if subscription %}
-                    {{ subscription.plan_type }}
-                {% else %}
-                    No Active Subscription
-                {% endif %}
-            </div>
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <div class="row mb-3">
-            <div class="col-md-4" style="color: #888;">Status</div>
-            <div class="col-md-8">
-                {% if subscription and subscription.status == 'active' %}
-                    <span style="color: #00f260;">Active</span>
-                {% else %}
-                    <span style="color: #ff4757;">Inactive</span>
-                {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+
+            <div class="admin-card mb-4">
+                <div class="section-title">Profile Settings</div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="admin-form-label">First Name</label>
+                            <input type="text" name="first_name" value="{{ request.user.first_name|default:'' }}"
+                                class="admin-input" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="admin-form-label">Last Name</label>
+                            <input type="text" name="last_name" value="{{ request.user.last_name|default:'' }}"
+                                class="admin-input" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="admin-form-label">Phone Number</label>
+                            <input type="text" name="phone_number" value="{{ request.user.phone_number|default:'' }}"
+                                class="admin-input">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn-save-hero">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
+
+            <div class="admin-card mb-4">
+                <div class="section-title" style="color: #00f260;">Airport Information</div>
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted">Airport Name</div>
+                    <div class="col-md-8 fw-bold text-white">{{ airport.name }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted">IATA Code</div>
+                    <div class="col-md-8">
+                        <span class="badge bg-light text-dark">{{ airport.code }}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 text-muted">Location</div>
+                    <div class="col-md-8 text-white">{{ airport.city }}, {{ airport.country }}</div>
+                </div>
+            </div>
+
         </div>
-        <div class="row">
-            <div class="col-md-4" style="color: #888;">Expires At</div>
-            <div class="col-md-8" style="color: white;">{{ subscription.expire_at|date:"Y-m-d" }}</div>
+
+        <div class="col-lg-4">
+
+            <div class="admin-card mb-4">
+                <div class="section-title" style="color: #0575e6;">Subscription Plan</div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Current Plan</span>
+                    <span class="fw-bold text-white">{{ subscription.plan_type|default:"No Active Subscription"
+                        }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Status</span>
+                    {% if subscription and subscription.status == 'active' %}
+                    <span class="badge bg-success">Active</span>
+                    {% else %}
+                    <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="text-muted">Expires At</span>
+                    <span class="text-white">{{ subscription.expire_at|date:"Y-m-d" }}</span>
+                </div>
+
+                <a href="{% url 'airport_renew_subscription' %}" class="btn btn-primary w-100">Manage Subscription</a>
+            </div>
+
+            <div class="admin-card mb-4">
+                <div class="section-title">Security</div>
+                <p class="text-muted small mb-3">Update your password to keep your account secure.</p>
+                <div class="d-grid">
+                    <button type="button" class="btn btn-outline-light"
+                        onclick="alert('Password change functionality coming soon!')">
+                        Change Password
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <div class="section-title">Support</div>
+                <div class="d-flex align-items-center mb-3">
+                    <span class="material-symbols-outlined text-muted me-2">email</span>
+                    <a href="mailto:support@rassid.com" class="text-decoration-none text-white">support@rassid.com</a>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="material-symbols-outlined text-muted me-2">call</span>
+                    <span class="text-white">+966 800 123 4567</span>
+                </div>
+            </div>
+
         </div>
     </div>
 

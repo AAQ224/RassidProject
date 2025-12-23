@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="registration-page-wrapper" style="padding-top: 120px; min-height: 100vh;">
+    <div class="registration-card" style="max-width: 600px; margin: 0 auto; background: #1e2124; color: white;">
+        <h1 class="reg-title" style="color: white;">Renew Subscription</h1>
+        <p class="reg-subtitle" style="color: #888;">Select a plan to extend your airport license.</p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-grid" style="display: block;">
+                <div class="plan-options" style="display: flex; flex-direction: column; gap: 15px;">
+                    <label class="plan-option"
+                        style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <input type="radio" name="plan" value="1_year" checked>
+                            <span style="margin-left: 10px; font-weight: bold;">1 Year License</span>
+                        </div>
+                        <span style="color: #2ecc71;">$499.00</span>
+                    </label>
+
+                    <label class="plan-option"
+                        style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <input type="radio" name="plan" value="3_years">
+                            <span style="margin-left: 10px; font-weight: bold;">3 Years License</span>
+                        </div>
+                        <span style="color: #2ecc71;">$1,299.00</span>
+                    </label>
+
+                    <label class="plan-option"
+                        style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <input type="radio" name="plan" value="5_years">
+                            <span style="margin-left: 10px; font-weight: bold;">5 Years License</span>
+                        </div>
+                        <span style="color: #2ecc71;">$1,999.00</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit-req"
+                style="margin-top: 30px; background: #2dce89; border: none; color: white; width: 100%; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                Proceed to Payment
+            </button>
+            <a href="{% url 'airport_dashboard' %}"
+                style="display: block; text-align: center; margin-top: 15px; color: #888; text-decoration: none;">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

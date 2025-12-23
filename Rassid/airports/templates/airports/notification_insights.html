@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+
+{{ dates|json_script:"dates-data" }}
+{{ delivery_rates|json_script:"rates-data" }}
+{{ failed_counts|json_script:"failed-data" }}
+
+<div class="dashboard-container">
+    <div class="header-section">
+        <h1 class="page-title">Notification Insights</h1>
+        <p class="page-subtitle">Track delivery performance and error logs</p>
+    </div>
+
+    <div class="row mb-5" style="display: flex; gap: 20px;">
+        <div class="glass-card" style="flex: 1; padding: 20px;">
+            <h3 style="color:white; margin-bottom: 20px;">Delivery Rate (Last 7 Days)</h3>
+            <canvas id="deliveryChart"></canvas>
+        </div>
+        <div class="glass-card" style="flex: 1; padding: 20px;">
+            <h3 style="color:white; margin-bottom: 20px;">Failed Notifications</h3>
+            <canvas id="failedChart"></canvas>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div class="card-header">
+            <h3>Recent Logs</h3>
+            <span class="code-badge">Last 50</span>
+        </div>
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.sent_at|date:"M d, H:i:s" }}</td>
+                    <td>{{ log.subject }}</td>
+                    <td>
+                        {% if log.status == 'Sent' %}
+                        <span class="status-badge success">Sent</span>
+                        {% else %}
+                        <span class="status-badge danger">Failed</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: #ccc; font-size: 0.85rem;">
+                        {{ log.error_message|default:"-"|truncatechars:50 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center" style="color: #666;">No notification logs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <a href="{% url 'airport_dashboard' %}" class="back-link">
+            <span class="material-symbols-outlined">arrow_back</span> Back to Dashboard
+        </a>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const datesData = JSON.parse(document.getElementById('dates-data').textContent);
+        const deliveryRatesData = JSON.parse(document.getElementById('rates-data').textContent);
+        const failedCountsData = JSON.parse(document.getElementById('failed-data').textContent);
+
+        const ctx1 = document.getElementById('deliveryChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: datesData,
+                datasets: [{
+                    label: 'Success Rate (%)',
+                    data: deliveryRatesData,
+                    borderColor: '#2ecc71',
+                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        const ctx2 = document.getElementById('failedChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: datesData,
+                datasets: [{
+                    label: 'Failed Count',
+                    data: failedCountsData,
+                    backgroundColor: '#e74c3c',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

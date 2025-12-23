@@ -7,8 +7,8 @@ from airports.models import Airport
 
 @login_required
 def create_ticket(request):
-    """Operator creates a ticket"""
-    if request.user.role != 'operator' or not request.user.airport_id:
+    """Operator or Admin creates a ticket"""
+    if request.user.role not in ['operator', 'airport_admin'] or not request.user.airport_id:
         messages.error(request, "Access denied.")
         return redirect('public_home')
 
@@ -20,6 +20,8 @@ def create_ticket(request):
             ticket.airport_id = request.user.airport_id
             ticket.save()
             messages.success(request, "Ticket created successfully.")
+            if request.user.role == 'airport_admin':
+                return redirect('airport_dashboard')
             return redirect('operator_flights_list')
     else:
         form = TicketForm()
@@ -41,7 +43,6 @@ def admin_tickets_list(request):
     if request.user.role != 'airport_admin' or not request.user.airport_id:
         return redirect('public_home')
 
-    # Show tickets for this admin's airport
     tickets = Ticket.objects.filter(airport_id=request.user.airport_id).order_by('-createdAt')
     return render(request, 'tickets/admin/ticket_list.html', {'tickets': tickets})
 

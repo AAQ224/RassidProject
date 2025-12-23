@@ -14,31 +14,87 @@
     </div>
 
     <div class="admin-card">
-        
+
         <div class="section-title">Employee Details</div>
 
         <form method="POST">
             {% csrf_token %}
-            
+
             <div class="row g-4">
                 <div class="col-md-6">
                     <label class="admin-form-label">First Name</label>
-                    <input type="text" name="first_name" value="{{ employee.first_name }}" class="admin-input" required>
+                    <input
+                        type="text"
+                        name="first_name"
+                        value="{{ employee.first_name }}"
+                        class="admin-input"
+                        required
+                    >
                 </div>
 
                 <div class="col-md-6">
                     <label class="admin-form-label">Last Name</label>
-                    <input type="text" name="last_name" value="{{ employee.last_name }}" class="admin-input" required>
+                    <input
+                        type="text"
+                        name="last_name"
+                        value="{{ employee.last_name }}"
+                        class="admin-input"
+                        required
+                    >
                 </div>
 
                 <div class="col-12">
                     <label class="admin-form-label">Email Address</label>
-                    <input type="email" name="email" value="{{ employee.email }}" class="admin-input" required>
+                    <input
+                        type="email"
+                        name="email"
+                        value="{{ employee.email }}"
+                        class="admin-input"
+                        required
+                    >
                 </div>
 
                 <div class="col-12">
                     <label class="admin-form-label">Phone Number</label>
-                    <input type="text" name="phone_number" value="{{ employee.phone_number|default:'' }}" class="admin-input">
+                    <input
+                        type="text"
+                        name="phone_number"
+                        value="{{ employee.phone_number|default:'' }}"
+                        class="admin-input"
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="admin-form-label">Role</label>
+                    <select name="role" class="admin-input">
+                        <option
+                            value="operator"
+                            {% if employee.role == 'operator' %}selected{% endif %}
+                        >
+                            Operator
+                        </option>
+                        <option
+                            value="airport_admin"
+                            {% if employee.role == 'airport_admin' %}selected{% endif %}
+                        >
+                            Admin
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 d-flex align-items-center">
+                    <div class="form-check form-switch mt-4">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            name="is_active"
+                            id="isActive"
+                            {% if employee.is_active %}checked{% endif %}
+                        >
+                        <label class="form-check-label text-white ms-2" for="isActive">
+                            Active Account
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -49,4 +105,5 @@
 
     </div>
 </div>
+
 {% endblock %}
