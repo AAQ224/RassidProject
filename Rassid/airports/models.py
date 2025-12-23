@@ -36,8 +36,10 @@ class SubscriptionRequest(models.Model):
     admin_phone = models.CharField(max_length=20)
     selected_plan = models.CharField(max_length=50, choices=PLAN_CHOICES, default='1_year')
     
+
     official_license = models.FileField(upload_to=airport_docs_path)
     commercial_record = models.FileField(upload_to=airport_docs_path, blank=True, null=True)
+    image = models.ImageField(upload_to='airport_images/', blank=True, null=True, default='airport_images/default.jpg')
 
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)

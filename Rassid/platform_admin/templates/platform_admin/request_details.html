@@ -5,10 +5,10 @@
 <div class="container" style="padding-top: 100px; padding-bottom: 50px; max-width: 1000px;">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 style="color: white; font-weight: 800;">Request Details</h2>
+        <h2 style="color: #4b4a4a; text-shadow: 0 1px 9px #777777;">Request Details</h2>
         <a href="{% url 'admin_requests_list' %}" class="btn btn-outline-light"
-            style="border-radius: 50px; padding: 8px 20px;">
-            <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">arrow_back</span>
+            style=" border-radius: 50px; padding: 8px 20px; ">
+            <span class="material-symbols-outlined" style=" vertical-align: middle; font-size: 18px; color: #4b4a4a!important; ">arrow_back</span>
             Back to List
         </a>
     </div>
@@ -89,6 +89,13 @@
                      Submitted Files
                 </h3>
                 <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                     {% if req.image %}
+                         <a href="{{ req.image.url }}" target="_blank" class="file-action-btn btn-view" title="View Airport Image">
+                             <span class="material-symbols-outlined">image</span>
+                             <span>View Airport Image</span>
+                         </a>
+                         <img src="{{ req.image.url }}" alt="Airport Image" style="max-width: 120px; max-height: 80px; border-radius: 8px; border: 1px solid #333; background: #fff; margin-left: 8px; vertical-align: middle;" />
+                     {% endif %}
                      {% if req.official_license %}
                          <a href="{{ req.official_license.url }}" data-file-url="{{ req.official_license.url }}" class="file-action-btn btn-view"
                             title="View Official License">
