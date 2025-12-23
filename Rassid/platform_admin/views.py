@@ -62,7 +62,8 @@ def admin_dashboard(request):
         "system_uptime": system_uptime
     }
 
-    latest_airports_qs = Airport.objects.all().order_by('-id')[:5]
+    # Filter for active airports only
+    latest_airports_qs = Airport.objects.filter(airportsubscription__status='active').order_by('-id')[:5]
     latest_airports = []
     for airport in latest_airports_qs:
         sub = AirportSubscription.objects.filter(airport=airport).first()
@@ -82,6 +83,56 @@ def admin_dashboard(request):
         "tickets": recent_tickets
     }
     return render(request, "platform_admin/dashboard.html", context)
+
+@login_required
+def platform_ticket_detail(request, ticket_id):
+    if not is_super_admin(request.user):
+        return redirect('public_home')
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    from tickets.models import TicketComment
+    from tickets.forms import CommentForm
+    
+    comments = TicketComment.objects.filter(ticket=ticket).order_by('commentedAt')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'reply':
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.ticket = ticket
+                comment.user = request.user
+                comment.save()
+                messages.success(request, "Reply added successfully.")
+        
+        elif action == 'assign':
+            # For now, just assign to current user or toggle
+            if ticket.assignedTo == request.user:
+                ticket.assignedTo = None
+                messages.info(request, "Unassigned from ticket.")
+            else:
+                ticket.assignedTo = request.user
+                messages.success(request, "Ticket assigned to you.")
+            ticket.save()
+            
+        elif action == 'close':
+            ticket.status = 'Closed'
+            ticket.save()
+            messages.success(request, "Ticket closed.")
+            return redirect('platform_admin_dashboard')
+
+        return redirect('platform_ticket_detail', ticket_id=ticket_id)
+
+    else:
+        form = CommentForm()
+
+    return render(request, 'platform_admin/ticket_detail.html', {
+        'ticket': ticket,
+        'comments': comments,
+        'form': form
+    })
 
 @login_required
 def subscription_requests_list(request):

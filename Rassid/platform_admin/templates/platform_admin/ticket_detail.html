@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px; margin-top: 40px; margin-bottom: 60px;">
+
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'platform_admin_dashboard' %}" class="btn-outline" style="padding: 8px 16px; font-size: 0.9em;">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+
+    <div class="glass-card" style="padding: 30px;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: start; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 20px;">
+            <div>
+                <h1 style="font-size: 24px; margin-bottom: 10px; color: white;">{{ ticket.title }}</h1>
+                <div style="color: #94a3b8; font-size: 14px;">
+                    <span
+                        style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; margin-right: 10px;">{{
+                        ticket.category }}</span>
+                    <span>Reported by <strong>{{ ticket.createdBy.get_full_name|default:ticket.createdBy.email
+                            }}</strong> from <strong>{{ ticket.airport.name }}</strong></span>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div class="badge status-{{ ticket.status|lower }}"
+                    style="font-size: 14px; padding: 6px 12px; margin-bottom: 10px; display: inline-block;">
+                    {{ ticket.status }}
+                </div>
+                <div style="color: #94a3b8; font-size: 12px;">{{ ticket.createdAt|date:"M d, Y H:i" }}</div>
+            </div>
+        </div>
+
+        <div
+            style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);">
+            <h3 style="font-size: 14px; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px;">Description
+            </h3>
+            <p style="color: #e2e8f0; line-height: 1.6; white-space: pre-wrap;">{{ ticket.description }}</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div
+            style="display: flex; gap: 10px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="assign">
+                <button type="submit" class="btn-primary" style="background: #0f172a; border: 1px solid #334155;">
+                    {% if ticket.assignedTo == request.user %}
+                    Unassign Me
+                    {% else %}
+                    Assign to Me
+                    {% endif %}
+                </button>
+            </form>
+
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="close">
+                <button type="submit" class="btn-action danger"
+                    onclick="return confirm('Are you sure you want to close this ticket?')"
+                    style="padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                    Close Ticket
+                </button>
+            </form>
+        </div>
+
+        <!-- Comments Section -->
+        <div>
+            <h3 style="margin-bottom: 20px; color: white;">Discussion History</h3>
+
+            {% for comment in comments %}
+            <div
+                style="margin-bottom: 20px; padding: 15px; border-radius: 8px; {% if comment.user.is_superuser %}background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.3);{% else %}background: rgba(255,255,255,0.05);{% endif %}">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <div
+                        style="font-weight: 600; font-size: 14px; {% if comment.user.is_superuser %}color: #818cf8;{% else %}color: #e2e8f0;{% endif %}">
+                        {{ comment.user.get_full_name|default:comment.user.email }} {% if comment.user.is_superuser
+                        %}(Admin){% endif %}
+                    </div>
+                    <div style="font-size: 12px; color: #64748b;">{{ comment.commentedAt|date:"M d, H:i" }}</div>
+                </div>
+                <div style="color: #cbd5e1; font-size: 15px;">{{ comment.comment }}</div>
+            </div>
+            {% empty %}
+            <p style="color: #64748b; font-style: italic;">No comments yet.</p>
+            {% endfor %}
+
+            <!-- Reply Form -->
+            <div style="margin-top: 30px;">
+                <h4 style="margin-bottom: 15px; color: white;">Add Reply</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reply">
+                    <div style="margin-bottom: 15px;">
+                        {{ form.comment }}
+                    </div>
+                    <button type="submit" class="btn-primary">Post Reply</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .status-open {
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+    }
+
+    .status-escalated {
+        background: rgba(168, 85, 247, 0.2);
+        color: #c084fc;
+    }
+
+    .status-closed {
+        background: rgba(100, 116, 139, 0.2);
+        color: #94a3b8;
+    }
+
+    .status-rejected {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+    }
+
+    textarea {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.2) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        padding: 15px;
+        border-radius: 8px;
+        min-height: 100px;
+    }
+</style>
+{% endblock %}

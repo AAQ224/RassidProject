@@ -5,14 +5,16 @@
 <style>
     /* تنسيقات خاصة بصفحة الداشبورد لضمان عدم اللخبطة */
     .dashboard-wrapper {
-        background-color: #0f1113; /* لون الخلفية الخاص بك */
+        background-color: #0f1113;
+        /* لون الخلفية الخاص بك */
         min-height: 100vh;
         padding: 40px 20px;
         color: #ffffff;
     }
 
     .rassid-card {
-        background: #1a1d21; /* لون الكروت في نظامك */
+        background: #1a1d21;
+        /* لون الكروت في نظامك */
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 10px;
         padding: 20px;
@@ -28,7 +30,8 @@
     }
 
     .metric-item {
-        border-left: 4px solid #22d3ee; /* اللون التركوازي */
+        border-left: 4px solid #22d3ee;
+        /* اللون التركوازي */
         padding-left: 15px;
     }
 
@@ -53,7 +56,9 @@
     }
 
     @media (max-width: 768px) {
-        .charts-container { grid-template-columns: 1fr; }
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
     }
 
     .chart-box {
@@ -64,7 +69,7 @@
         align-items: center;
         justify-content: center;
         color: #555;
-        border: 1px dashed rgba(255,255,255,0.1);
+        border: 1px dashed rgba(255, 255, 255, 0.1);
     }
 
     /* تنسيق الجدول الاحترافي */
@@ -79,12 +84,12 @@
         font-size: 0.75rem;
         text-transform: uppercase;
         padding: 15px;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .rassid-table td {
         padding: 15px;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         font-size: 0.9rem;
     }
 
@@ -114,7 +119,7 @@
 
 <div class="dashboard-wrapper">
     <div class="container">
-        
+
         <div class="d-flex justify-content-between align-items-center mb-5">
             <h3 class="fw-bold">Airport Dashboard</h3>
             <a href="/logout/" class="text-danger text-decoration-none small">Logout</a>
@@ -168,7 +173,8 @@
                             <td class="text-muted">{{ employee.email }}</td>
                             <td>{{ employee.role }}</td>
                             <td>
-                                <a href="{% url 'airport_admin_edit_employee' employee.id %}" class="text-info text-decoration-none">Edit</a>
+                                <a href="{% url 'airport_admin_edit_employee' employee.id %}"
+                                    class="text-info text-decoration-none">Edit</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -179,25 +185,56 @@
 
         <div class="row">
             <div class="col-md-7">
-                <div class="rassid-card">
-                    <h5 class="mb-4">Tickets Inbox</h5>
-                    <table class="rassid-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Subject</th>
-                                <th>Priority</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>#T001</td>
-                                <td>Gate 4 System Offline</td>
-                                <td class="text-danger">High</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="m-0">Tickets Inbox</h5>
+                    <a href="{% url 'admin_tickets_list' %}" class="text-info text-decoration-none small">View All</a>
                 </div>
+                {% if tickets %}
+                <table class="rassid-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets|slice:":5" %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ ticket.title|truncatechars:30 }}</div>
+                                <small class="text-muted">#{{ ticket.id }} • {{ ticket.category }}</small>
+                            </td>
+                            <td>
+                                <span
+                                    class="badge {% if ticket.status == 'Open' %}bg-info{% elif ticket.status == 'Escalated' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                    {{ ticket.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if ticket.priority == 'High' %}
+                                <span class="text-danger fw-bold">High</span>
+                                {% elif ticket.priority == 'Medium' %}
+                                <span class="text-warning">Medium</span>
+                                {% else %}
+                                <span class="text-success">Low</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'admin_ticket_detail' ticket.id %}"
+                                    class="btn btn-sm btn-outline-light">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <span class="material-symbols-outlined d-block mb-2" style="font-size: 2rem;">inbox</span>
+                    No active tickets
+                </div>
+                {% endif %}
             </div>
             <div class="col-md-5">
                 <div class="rassid-card">

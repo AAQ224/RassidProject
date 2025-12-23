@@ -34,8 +34,12 @@
             </div>
 
             <div class="nav-center">
-                {% if user.is_authenticated and user.role == 'airport_admin' %}
+                {% if user.is_authenticated and user.role == 'airport_admin' or user.role == 'operator' %}
+                {% if user.role == 'operator' %}
+                <a href="{% url 'operator_flights_list' %}" class="nav-link">Dashboard</a>
+                {% else %}
                 <a href="{% url 'airport_dashboard' %}" class="nav-link">Dashboard</a>
+                {% endif %}
                 <a href="{% url 'airport_admin_employees' %}" class="nav-link">Employees</a>
                 <a href="{% url 'airport_settings' %}" class="nav-link">Settings</a>
                 {% else %}
@@ -77,8 +81,12 @@
     </nav>
 
     <div class="mobile-menu">
-        {% if user.is_authenticated and user.role == 'airport_admin' %}
+        {% if user.is_authenticated and user.role == 'airport_admin' or user.role == 'operator' %}
+        {% if user.role == 'operator' %}
+        <a href="{% url 'operator_flights_list' %}">Dashboard</a>
+        {% else %}
         <a href="{% url 'airport_dashboard' %}">Dashboard</a>
+        {% endif %}
         <a href="{% url 'airport_admin_employees' %}">Employees</a>
         <a href="{% url 'airport_settings' %}">Settings</a>
         {% else %}

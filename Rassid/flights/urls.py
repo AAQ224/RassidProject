@@ -9,8 +9,10 @@ router.register("gate-assignments", GateAssignmentViewSet)
 router.register("status-history", FlightStatusHistoryViewSet)
 
 urlpatterns = [
-    path("", include(router.urls)),
     path("flights/", views.flights_list, name="operator_flights_list"),
+    path("dashboard/", views.flights_list, name="operator_dashboard"),
     path("flights/<int:pk>/edit/", views.edit_flight, name="operator_edit_flight"),
+    path("flights/fetch/", views.fetch_flights, name="operator_fetch_flights"),
     path("flights/<int:pk>/passengers/", views.passenger_list, name="operator_passenger_list"),
+    path("", include(router.urls)),
 ]

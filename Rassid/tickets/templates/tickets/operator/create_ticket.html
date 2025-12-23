@@ -1,0 +1,46 @@
+{% extends 'base.html' %} {% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Create Ticket</h1>
+        <p>Report an issue to the Airport Administration</p>
+    </div>
+</div>
+
+<div class="container" style="max-width: 800px; margin-top: 30px;">
+    <div class="glass-card" style="padding: 30px;">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.title.id_for_label }}"
+                    style="display: block; margin-bottom: 8px; font-weight: 500;">Title</label>
+                {{ form.title }}
+            </div>
+
+            <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="{{ form.category.id_for_label }}"
+                        style="display: block; margin-bottom: 8px; font-weight: 500;">Category</label>
+                    {{ form.category }}
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="{{ form.priority.id_for_label }}"
+                        style="display: block; margin-bottom: 8px; font-weight: 500;">Priority</label>
+                    {{ form.priority }}
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 30px;">
+                <label for="{{ form.description.id_for_label }}"
+                    style="display: block; margin-bottom: 8px; font-weight: 500;">Description</label>
+                {{ form.description }}
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 15px;">
+                <a href="{% url 'operator_tickets_list' %}" class="btn-outline">Cancel</a>
+                <button type="submit" class="btn-primary">Submit Ticket</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

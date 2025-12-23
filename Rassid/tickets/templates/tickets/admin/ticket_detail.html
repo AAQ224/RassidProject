@@ -1,0 +1,112 @@
+{% extends 'base.html' %} {% block content %}
+<div class="page-header">
+    <div class="container">
+        <a href="{% url 'admin_tickets_list' %}"
+            style="color: #94a3b8; text-decoration: none; margin-bottom: 10px; display: inline-block;">
+            &larr; Back to Tickets
+        </a>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h1 style="display: flex; align-items: center; gap: 10px;">
+                    #{{ ticket.id }} - {{ ticket.title }}
+                    <span class="badge status-{{ ticket.status|lower }}"
+                        style="font-size: 0.5em; vertical-align: middle;">{{ ticket.status }}</span>
+                </h1>
+                <p>Reported by <strong>{{ ticket.createdBy.username }}</strong> on {{ ticket.createdAt|date:"M d, Y at
+                    H:i" }}</p>
+            </div>
+
+            {% if ticket.status == 'Open' %}
+            <div style="display: flex; gap: 10px;">
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="reject" class="btn-outline"
+                        style="color: #ef4444; border-color: #ef4444;">Reject</button>
+                    <button type="submit" name="action" value="escalate" class="btn-primary">Accept & Escalate</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container" style="margin-top: 30px; display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+
+    <!-- Left Column: Details & Comments -->
+    <div style="display: flex; flex-direction: column; gap: 30px;">
+
+        <!-- Description -->
+        <div class="glass-card" style="padding: 25px;">
+            <h3 style="margin-bottom: 15px; font-size: 1.1em;">Description</h3>
+            <p style="line-height: 1.6; color: #334155;">{{ ticket.description }}</p>
+        </div>
+
+        <!-- Comments / Timeline -->
+        <div class="glass-card" style="padding: 25px;">
+            <h3 style="margin-bottom: 20px; font-size: 1.1em;">Timeline & Notes</h3>
+
+            <div class="timeline" style="display: flex; flex-direction: column; gap: 20px;">
+                {% for comment in comments %}
+                <div class="comment" style="display: flex; gap: 15px;">
+                    <div class="avatar"
+                        style="width: 35px; height: 35px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #475569;">
+                        {{ comment.user.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <div style="margin-bottom: 5px;">
+                            <strong>{{ comment.user.username }}</strong>
+                            <span style="color: #94a3b8; font-size: 0.85em; margin-left: 8px;">{{
+                                comment.commentedAt|date:"M d, H:i" }}</span>
+                        </div>
+                        <p style="color: #475569; margin: 0;">{{ comment.comment }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color: #94a3b8; font-style: italic;">No notes added yet.</p>
+                {% endfor %}
+            </div>
+
+            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+            <!-- Add Note Form -->
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="comment">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Add Internal Note</label>
+                    {{ comment_form.comment }}
+                </div>
+                <button type="submit" class="btn-outline btn-sm">Post Note</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: Meta Info -->
+    <div>
+        <div class="glass-card" style="padding: 20px;">
+            <h3 style="margin-bottom: 20px; font-size: 1.1em;">Ticket Info</h3>
+
+            <div style="margin-bottom: 15px;">
+                <label style="color: #94a3b8; display: block; font-size: 0.85em; margin-bottom: 5px;">Category</label>
+                <div style="font-weight: 500;">{{ ticket.category }}</div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="color: #94a3b8; display: block; font-size: 0.85em; margin-bottom: 5px;">Priority</label>
+                <div style="font-weight: 500;">{{ ticket.priority }}</div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="color: #94a3b8; display: block; font-size: 0.85em; margin-bottom: 5px;">Status</label>
+                <div style="font-weight: 500;">{{ ticket.status }}</div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="color: #94a3b8; display: block; font-size: 0.85em; margin-bottom: 5px;">Managed By</label>
+                <div style="font-weight: 500;">{{ user.username }}</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

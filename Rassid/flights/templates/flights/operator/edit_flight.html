@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="edit-flight-container">
+    <div class="edit-header">
+        <a href="{% url 'operator_flights_list' %}" class="back-link">
+            <span class="material-symbols-outlined">arrow_back</span> Back to Flights
+        </a>
+        <h1>Manage Flight {{ flight.flightNumber }}</h1>
+        <p>
+            {{ flight.origin.city }} ({{ flight.origin.code }})
+            <span class="material-symbols-outlined" style="font-size: 14px; margin: 0 5px;">flight_takeoff</span>
+            {{ flight.destination.city }} ({{ flight.destination.code }})
+        </p>
+    </div>
+
+    <form method="POST" class="edit-form">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h2>Flight Status & Schedule</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="status">Current Status</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="Scheduled" {% if flight.status == 'Scheduled' %}selected{% endif %}>Scheduled
+                        </option>
+                        <option value="Boarding" {% if flight.status == 'Boarding' %}selected{% endif %}>Boarding</option>
+                        <option value="Departed" {% if flight.status == 'Departed' %}selected{% endif %}>Departed</option>
+                        <option value="Delayed" {% if flight.status == 'Delayed' %}selected{% endif %}>Delayed</option>
+                        <option value="Cancelled" {% if flight.status == 'Cancelled' %}selected{% endif %}>Cancelled
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="scheduledDeparture">Departure Time</label>
+                    <input type="datetime-local" id="scheduledDeparture" name="scheduledDeparture"
+                        value="{{ flight.scheduledDeparture|date:'Y-m-d\TH:i' }}" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Gate Assignment</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="gateCode">Gate Number</label>
+                    <input type="text" id="gateCode" name="gateCode" value="{{ gate_assignment.gateCode|default:'' }}"
+                        placeholder="e.g. A12" required class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="terminal">Terminal</label>
+                    <input type="text" id="terminal" name="terminal" value="{{ gate_assignment.terminal|default:'' }}"
+                        placeholder="e.g. T1" required class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="boardingOpenTime">Boarding Opens</label>
+                    <input type="datetime-local" id="boardingOpenTime" name="boardingOpenTime"
+                        value="{{ gate_assignment.boardingOpenTime|date:'Y-m-d\TH:i' }}" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="boardingCloseTime">Boarding Closes</label>
+                    <input type="datetime-local" id="boardingCloseTime" name="boardingCloseTime"
+                        value="{{ gate_assignment.boardingCloseTime|date:'Y-m-d\TH:i' }}" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Save Changes</button>
+            <a href="{% url 'operator_flights_list' %}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .edit-flight-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .edit-header {
+        margin-bottom: 30px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #64748b;
+        text-decoration: none;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+    }
+
+    .edit-header h1 {
+        margin-bottom: 5px;
+        color: #0f172a;
+    }
+
+    .edit-form {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .form-section h2 {
+        font-size: 1.1rem;
+        color: #0f172a;
+        margin-bottom: 20px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #475569;
+    }
+
+    .form-control {
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #0f172a;
+        box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.1);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn-submit {
+        background: #0f172a;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .btn-cancel {
+        padding: 12px 24px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        color: #475569;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .btn-submit:hover {
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}

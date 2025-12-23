@@ -1,14 +1,12 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import TicketViewSet, TicketCommentViewSet
+from django.urls import path
 from . import views
 
-router = DefaultRouter()
-router.register("tickets", TicketViewSet)
-router.register("comments", TicketCommentViewSet)
-
 urlpatterns = [
-    path("", include(router.urls)),
-    path("tickets/", views.tickets_list, name="tickets_list"),
-    path("tickets/<int:pk>/", views.ticket_details, name="ticket_details"),
+    # Operator URLs
+    path('create/', views.create_ticket, name='create_ticket'),
+    path('my-tickets/', views.operator_tickets_list, name='operator_tickets_list'),
+
+    # Admin URLs
+    path('manage/', views.admin_tickets_list, name='admin_tickets_list'),
+    path('manage/<int:pk>/', views.admin_ticket_detail, name='admin_ticket_detail'),
 ]
