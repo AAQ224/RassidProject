@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/admin_requests.css' %}">
+
 
 <div class="dashboard-container" style="max-width: 600px;">
     <div class="glass-card">
@@ -16,9 +16,9 @@
                 <label style="display: block; margin-bottom: 8px; color: #cbd5e1;">Select New Plan</label>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     {% for code, label in plans %}
-                    <label class="glass-card"
-                        style="padding: 15px; cursor: pointer; border: 1px solid {% if subscription.plan_type == code %}#2ecc71{% else %}transparent{% endif %};">
-                        <input type="radio" name="plan_type" value="{{ code }}" {% if subscription.plan_type ==  code %}checked{% endif %} style="margin-right: 10px;">
+                    <label class="glass-card plan-selector {% if subscription.plan_type == code %}active{% endif %}"
+                        style="padding: 15px; cursor: pointer;">
+                        <input type="radio" name="plan_type" value="{{ code }}" {% if subscription.plan_type == code %}checked{% endif %} style="margin-right: 10px;">
                         {{ label }}
                         {% if subscription.plan_type == code %} (Current) {% endif %}
                     </label>
