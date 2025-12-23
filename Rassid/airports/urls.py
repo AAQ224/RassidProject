@@ -4,7 +4,7 @@ from .views import (
     AirportViewSet, AirportSubscriptionViewSet, SubscriptionRequestViewSet, 
     dashboard, employees_list, add_employee, airport_settings, 
     request_subscription, approve_subscription, edit_employee, delete_employee,
-    payment_checkout, payment_success
+    payment_checkout, payment_success, sync_flights_data
 )
 
 router = DefaultRouter()
@@ -23,6 +23,7 @@ urlpatterns = [
     path('payment/success/<int:request_id>/', payment_success, name='airport_payment_success'),
 
     path("dashboard/", dashboard, name="airport_dashboard"),
+    path("dashboard/sync-flights/", sync_flights_data, name="sync_flights_data"),
     
     path("employees/", employees_list, name="airport_admin_employees"),
     path("employees/add/", add_employee, name="airport_admin_add_employee"),
