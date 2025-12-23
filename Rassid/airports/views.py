@@ -98,7 +98,8 @@ def dashboard(request):
         scheduledDeparture__date=today
     ).count()
 
-    total_tickets = Ticket.objects.filter(airport=my_airport).count()
+    tickets = Ticket.objects.filter(airport=my_airport).select_related('createdBy').order_by('-createdAt')
+    total_tickets = tickets.count()
 
     upcoming_flights = Flight.objects.filter(
         origin=my_airport,
@@ -112,6 +113,7 @@ def dashboard(request):
         'total_tickets': total_tickets,
         'upcoming_flights': upcoming_flights,
         'employees': employees, 
+        'tickets': tickets,
     }
     
     return render(request, "airports/dashboard.html", context)

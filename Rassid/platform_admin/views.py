@@ -55,8 +55,8 @@ def admin_dashboard(request):
         system_uptime = "100%"
 
     stats = {
-        "airports_count": Airport.objects.count(),
-        "active_subscriptions": AirportSubscription.objects.filter(status='active').values('airport').distinct().count(),
+        "airports_count": AirportSubscription.objects.count(),
+        "active_subscriptions": AirportSubscription.objects.filter(status='active', expire_at__gt=timezone.now()).values('airport').distinct().count(),
         "employees_count": User.objects.filter(role__in=['airport_admin', 'airport_staff']).count(),
         "passengers_today": passengers_today,
         "emails_delivered": emails_sent_count,
@@ -64,7 +64,9 @@ def admin_dashboard(request):
         "system_uptime": system_uptime,
     }
 
-    latest_airports = list(Airport.objects.all().order_by('-created_at')[:5])
+    latest_airports_qs = Airport.objects.filter(airportsubscription__status='active').order_by('-created_at')[:5]
+    latest_airports = list(latest_airports_qs)
+
     for airport in latest_airports:
         airport.admins_count = User.objects.filter(airport_id=airport.id, role='airport_admin').count()
         sub = AirportSubscription.objects.filter(airport_id=airport.id).order_by('-expire_at').first()
@@ -94,7 +96,7 @@ def admin_dashboard(request):
             else:
                 airport.remaining_time_str = "Expired"
 
-    tickets = Ticket.objects.filter(status__in=['open', 'in_progress']).order_by('-createdAt')[:5]
+    tickets = Ticket.objects.filter(status__in=['Open', 'Escalated', 'In Progress']).order_by('-createdAt')[:5]
 
     context = {
         "stats": stats,
@@ -102,6 +104,55 @@ def admin_dashboard(request):
         "tickets": tickets
     }
     return render(request, "platform_admin/dashboard.html", context)
+
+@login_required
+def platform_ticket_detail(request, ticket_id):
+    if not is_super_admin(request.user):
+        return redirect('public_home')
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    from tickets.models import TicketComment
+    from tickets.forms import CommentForm
+    
+    comments = TicketComment.objects.filter(ticket=ticket).order_by('commentedAt')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'reply':
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.ticket = ticket
+                comment.user = request.user
+                comment.save()
+                messages.success(request, "Reply added successfully.")
+        
+        elif action == 'assign':
+            if ticket.assignedTo == request.user:
+                ticket.assignedTo = None
+                messages.info(request, "Unassigned from ticket.")
+            else:
+                ticket.assignedTo = request.user
+                messages.success(request, "Ticket assigned to you.")
+            ticket.save()
+            
+        elif action == 'close':
+            ticket.status = 'Closed'
+            ticket.save()
+            messages.success(request, "Ticket closed.")
+            return redirect('platform_dashboard')
+
+        return redirect('platform_ticket_detail', ticket_id=ticket_id)
+
+    else:
+        form = CommentForm()
+
+    return render(request, 'platform_admin/ticket_detail.html', {
+        'ticket': ticket,
+        'comments': comments,
+        'form': form
+    })
 
 @login_required
 def subscription_requests_list(request):
@@ -234,7 +285,7 @@ def reject_request(request, request_id):
 def airports(request):
     if not is_super_admin(request.user):
         return redirect('public_home')
-    airports_qs = Airport.objects.all().order_by("code")
+    airports_qs = Airport.objects.filter(airportsubscription__isnull=False).distinct().order_by("code")
     return render(request, "platform_admin/airports.html", {
         "airports": airports_qs,
     })

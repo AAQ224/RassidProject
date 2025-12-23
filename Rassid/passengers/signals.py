@@ -1,0 +1,93 @@
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils.html import strip_tags
+from flights.models import FlightStatusHistory, GateAssignment
+from passengers.models import PassengerFlight
+
+def send_update_email_to_passengers(flight, title_en, desc_en, title_ar, desc_ar):
+    bookings = PassengerFlight.objects.filter(flight=flight).select_related('passenger')
+    
+    for booking in bookings:
+        passenger = booking.passenger
+        lang = passenger.preferredLanguage
+        
+        token = passenger.trackingToken
+        # Hardcoding domain for now as we don't have request object in signal
+        # Ideally use sites framework or settings.SITE_URL
+        tracking_url = f"http://127.0.0.1:8000/passengers/track/{token}/"
+        
+        if lang == 'ar':
+            subject = f"تحديث الرحلة {flight.flightNumber}"
+            template = 'emails/flight_update_ar.html'
+            context = {
+                'passenger_name': passenger.fullName,
+                'flight_number': flight.flightNumber,
+                'update_title': title_ar,
+                'update_description': desc_ar,
+                'tracking_url': tracking_url
+            }
+        else:
+            subject = f"Flight Update {flight.flightNumber}"
+            template = 'emails/flight_update_en.html'
+            context = {
+                'passenger_name': passenger.fullName,
+                'flight_number': flight.flightNumber,
+                'update_title': title_en,
+                'update_description': desc_en,
+                'tracking_url': tracking_url
+            }
+
+        html_message = render_to_string(template, context)
+        plain_message = strip_tags(html_message)
+        
+        try:
+            print(f"Sending email to {passenger.email}...")
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [passenger.email],
+                html_message=html_message,
+                fail_silently=False
+            )
+            print("Email sent.")
+        except Exception as e:
+            print(f"Failed to send email to {passenger.email}: {e}")
+
+@receiver(post_save, sender=FlightStatusHistory)
+def flight_status_changed(sender, instance, created, **kwargs):
+    if created:
+        flight = instance.flight
+        # Example Statuses: scheduled, boarding, departed, delayed, cancelled
+        
+        send_update_email_to_passengers(
+            flight,
+            title_en=f"Status Changed to {instance.newStatus}",
+            desc_en=f"The flight status has been updated to {instance.newStatus}.",
+            title_ar=f"تغيرت الحالة إلى {instance.newStatus}",
+            desc_ar=f"تم تحديث حالة الرحلة إلى {instance.newStatus}."
+        )
+
+@receiver(post_save, sender=GateAssignment)
+def gate_assigned(sender, instance, created, **kwargs):
+    # This signal triggers on create OR update (save)
+    flight = instance.flight
+    
+    boarding_time = instance.boardingOpenTime
+    if hasattr(boarding_time, 'strftime'):
+        boarding_time_str = boarding_time.strftime('%H:%M')
+    else:
+        # It's a string, likely ISO format 'YYYY-MM-DDTHH:MM' or similar
+        # We can just take the time part or print as is
+        boarding_time_str = str(boarding_time).split('T')[-1][:5]
+
+    send_update_email_to_passengers(
+        flight,
+        title_en=f"Gate Information Updated",
+        desc_en=f"Gate: {instance.gateCode}, Terminal: {instance.terminal}. Boarding at {boarding_time_str}.",
+        title_ar=f"تحديث معلومات البوابة",
+        desc_ar=f"البوابة: {instance.gateCode}، الصالة: {instance.terminal}. الصعود في {boarding_time_str}."
+    )

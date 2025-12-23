@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/flight_operator.css' %}">
+
+<div class="edit-flight-container">
+    <div class="edit-header">
+        <a href="{% url 'operator_flights_list' %}" class="back-link">
+            <span class="material-symbols-outlined">arrow_back</span> Back to Flights
+        </a>
+        <h1>Manage Flight {{ flight.flightNumber }}</h1>
+        <p>
+            {{ flight.origin.city }} ({{ flight.origin.code }})
+            <span class="material-symbols-outlined" style="font-size: 14px; margin: 0 5px;">flight_takeoff</span>
+            {{ flight.destination.city }} ({{ flight.destination.code }})
+        </p>
+    </div>
+
+    <form method="POST" class="edit-form">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h2>Flight Status & Schedule</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="status">Current Status</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="Scheduled" {% if flight.status == 'Scheduled' %}selected{% endif %}>Scheduled
+                        </option>
+                        <option value="Boarding" {% if flight.status == 'Boarding' %}selected{% endif %}>Boarding</option>
+                        <option value="Departed" {% if flight.status == 'Departed' %}selected{% endif %}>Departed</option>
+                        <option value="Delayed" {% if flight.status == 'Delayed' %}selected{% endif %}>Delayed</option>
+                        <option value="Cancelled" {% if flight.status == 'Cancelled' %}selected{% endif %}>Cancelled
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="scheduledDeparture">Departure Time</label>
+                    <input type="datetime-local" id="scheduledDeparture" name="scheduledDeparture"
+                        value="{{ flight.scheduledDeparture|date:'Y-m-d\TH:i' }}" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Gate Assignment</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="gateCode">Gate Number</label>
+                    <input type="text" id="gateCode" name="gateCode" value="{{ gate_assignment.gateCode|default:'' }}"
+                        placeholder="e.g. A12" required class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="terminal">Terminal</label>
+                    <input type="text" id="terminal" name="terminal" value="{{ gate_assignment.terminal|default:'' }}"
+                        placeholder="e.g. T1" required class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="boardingOpenTime">Boarding Opens</label>
+                    <input type="datetime-local" id="boardingOpenTime" name="boardingOpenTime"
+                        value="{{ gate_assignment.boardingOpenTime|date:'Y-m-d\TH:i' }}" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="boardingCloseTime">Boarding Closes</label>
+                    <input type="datetime-local" id="boardingCloseTime" name="boardingCloseTime"
+                        value="{{ gate_assignment.boardingCloseTime|date:'Y-m-d\TH:i' }}" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Save Changes</button>
+            <a href="{% url 'operator_flights_list' %}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

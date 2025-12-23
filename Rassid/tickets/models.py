@@ -10,10 +10,29 @@ class Ticket(models.Model):
     createdBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_tickets")
     assignedTo = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="assigned_tickets")
 
+    CATEGORY_CHOICES = [
+        ('API', 'API'),
+        ('SMS', 'SMS'),
+        ('System', 'System'),
+        ('Other', 'Other'),
+    ]
+    PRIORITY_CHOICES = [
+        ('High', 'High'),
+        ('Medium', 'Medium'),
+        ('Low', 'Low'),
+    ]
+    STATUS_CHOICES = [
+        ('Open', 'Open'),
+        ('Escalated', 'Escalated'),
+        ('Closed', 'Closed'),
+        ('Rejected', 'Rejected'),
+    ]
+
     title = models.CharField(max_length=200)
-    category = models.CharField(max_length=50)
-    priority = models.CharField(max_length=20)
-    status = models.CharField(max_length=20)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    description = models.TextField(default="")
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Open')
 
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)

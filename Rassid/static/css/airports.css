@@ -1,0 +1,141 @@
+/* Airports App Styles */
+
+/* Payment Checkout */
+.checkout-page-wrapper {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f1f5f9;
+    padding: 20px;
+}
+
+.checkout-card {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+.checkout-icon-box {
+    margin-bottom: 30px;
+}
+
+.checkout-icon {
+    font-size: 64px;
+    color: #3b82f6;
+}
+
+.checkout-title {
+    font-size: 28px;
+    color: #0f172a;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.checkout-desc {
+    color: #64748b;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.order-summary {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.summary-label {
+    color: #64748b;
+}
+
+.summary-value {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px dashed #cbd5e1;
+}
+
+.total-value {
+    font-weight: 700;
+    color: #3b82f6;
+    font-size: 1.2rem;
+}
+
+.pay-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 50px;
+    border: none;
+    background: #0f172a;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.security-note {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.secure-icon {
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+/* Subscription Request */
+.alert-success-custom {
+    padding: 15px;
+    background: rgba(0, 242, 96, 0.1);
+    border: 1px solid #00f260;
+    color: #00f260;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.form-section-header {
+    color: #fff;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.form-section-header-top {
+    margin-top: 30px;
+}
+
+.error-text {
+    color: #e74c3c;
+    margin-bottom: 5px;
+}
+
+.form-note {
+    color: #e67e22;
+    margin-bottom: 10px;
+    font-size: 0.95em;
+}

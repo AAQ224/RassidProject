@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<body>
+    <h2>مرحباً {{ passenger_name }}،</h2>
+    <p>تم تحديث حالة رحلتك <strong>{{ flight_number }}</strong>.</p>
+
+    <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin-top:0;">{{ update_title }}</h3>
+        <p style="margin-bottom:0;">{{ update_description }}</p>
+    </div>
+
+    <p>نتمنى لك رحلة مريحة.</p>
+
+    <p>
+        <a href="{{ tracking_url }}"
+            style="background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            تتبع رحلتك
+        </a>
+    </p>
+
+    <p>أو اضغط هنا: <a href="{{ tracking_url }}">{{ tracking_url }}</a></p>
+
+    <br>
+    <p>شكراً،<br>فريق رصيد</p>
+</body>
+
+</html>

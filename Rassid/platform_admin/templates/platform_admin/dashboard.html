@@ -116,10 +116,11 @@
                     </td>
                     <td>{{ ticket.status }}</td>
                     <td style="text-align: right;">
-                        <button class="btn-action" onclick="alert('Feature coming soon')">Assign</button>
-                        <button class="btn-action" onclick="alert('Feature coming soon')">Reply</button>
-                        <a href="{% url 'admin_close_ticket' ticket.id %}" class="btn-action danger"
-                            onclick="return confirm('Close this ticket?');">Close</a>
+                        <a href="{% url 'platform_ticket_detail' ticket.id %}" class="btn-action">View & Reply</a>
+                        {% if ticket.assignedTo == request.user %}
+                        <span class="badge"
+                            style="background: #8b5cf6; padding: 2px 6px; font-size: 10px; margin-left: 5px;">Assigned</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

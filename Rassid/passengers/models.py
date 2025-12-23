@@ -8,6 +8,12 @@ class Passenger(models.Model):
     trackingToken = models.CharField(max_length=200)
     preferredLanguage = models.CharField(max_length=10, default="en")
 
+    def save(self, *args, **kwargs):
+        if not self.trackingToken:
+            import uuid
+            self.trackingToken = str(uuid.uuid4())
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.fullName
 
@@ -19,3 +25,4 @@ class PassengerFlight(models.Model):
     seatNumber = models.CharField(max_length=10)
     bookingRef = models.CharField(max_length=20)
     ticketStatus = models.CharField(max_length=20)
+

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/platform_tickets.css' %}">
+
+<div class="container ticket-container">
+
+    <div class="back-btn-container">
+        <a href="{% url 'platform_dashboard' %}" class="btn-outline back-link">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+
+    <div class="glass-card glass-card-padded">
+        <div class="ticket-header">
+            <div>
+                <h1 class="ticket-title">{{ ticket.title }}</h1>
+                <div class="ticket-meta">
+                    <span class="cat-badge">{{ ticket.category }}</span>
+                    <span>Reported by <strong>{{ ticket.createdBy.get_full_name|default:ticket.createdBy.email
+                            }}</strong> from <strong>{{ ticket.airport.name }}</strong></span>
+                </div>
+            </div>
+            <div class="ticket-status-col">
+                <div class="badge ticket-badge status-{{ ticket.status|lower }}">
+                    {{ ticket.status }}
+                </div>
+                <div class="ticket-time">{{ ticket.createdAt|date:"M d, Y H:i" }}</div>
+            </div>
+        </div>
+
+        <div class="ticket-desc-box">
+            <h3 class="desc-label">Description</h3>
+            <p class="desc-text">{{ ticket.description }}</p>
+        </div>
+
+        <div class="ticket-actions">
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="assign">
+                <button type="submit" class="btn-primary btn-assign">
+                    {% if ticket.assignedTo == request.user %}
+                    Unassign Me
+                    {% else %}
+                    Assign to Me
+                    {% endif %}
+                </button>
+            </form>
+
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="close">
+                <button type="submit" class="btn-primary btn-close-ticket"
+                    onclick="return confirm('Are you sure you want to close this ticket?')">
+                    Close Ticket
+                </button>
+            </form>
+        </div>
+
+        <div>
+            <h3 class="discussion-header">Discussion History</h3>
+
+            {% for comment in comments %}
+            <div class="comment-item {% if comment.user.is_superuser %}comment-superuser{% endif %}">
+                <div class="comment-header">
+                    <div class="comment-author {% if comment.user.is_superuser %}comment-author-admin{% endif %}">
+                        {{ comment.user.get_full_name|default:comment.user.email }} {% if
+                        comment.user.is_superuser%}(Admin){% endif %}
+                    </div>
+                    <div class="comment-date">{{ comment.commentedAt|date:"M d, H:i" }}</div>
+                </div>
+                <div class="comment-text">{{ comment.comment }}</div>
+            </div>
+            {% empty %}
+            <p style="color: #64748b; font-style: italic;">No comments yet.</p>
+            {% endfor %}
+
+            <div class="reply-section">
+                <h4 class="reply-header">Add Reply</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reply">
+                    <div style="margin-bottom: 15px;">
+                        {{ form.comment }}
+                    </div>
+                    <button type="submit" class="btn-primary">Post Reply</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

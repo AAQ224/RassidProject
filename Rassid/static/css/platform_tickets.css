@@ -1,0 +1,187 @@
+/* Platform Admin - Ticket Detail Styles */
+
+.ticket-container {
+    max-width: 1000px;
+    margin-top: 40px;
+    margin-bottom: 60px;
+}
+
+.back-btn-container {
+    margin-bottom: 20px;
+}
+
+.back-link {
+    padding: 8px 16px;
+    font-size: 0.9em;
+}
+
+.glass-card-padded {
+    padding: 30px;
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.ticket-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.ticket-meta {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.cat-badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.ticket-status-col {
+    text-align: right;
+}
+
+.ticket-badge {
+    font-size: 14px;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.ticket-time {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.ticket-desc-box {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.desc-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+.desc-text {
+    color: #e2e8f0;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.ticket-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-assign {
+    background: #0f172a;
+    border: 1px solid #334155;
+}
+
+.btn-close-ticket {
+    background: #450a0a;
+    border: 1px solid #7f1d1d;
+    color: #fca5a5;
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+.discussion-header {
+    margin-bottom: 20px;
+    color: white;
+}
+
+.comment-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.comment-superuser {
+    background: rgba(79, 70, 229, 0.1);
+    border: 1px solid rgba(79, 70, 229, 0.3);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.comment-author {
+    font-weight: 600;
+    font-size: 14px;
+    color: #e2e8f0;
+}
+
+.comment-author-admin {
+    color: #818cf8;
+}
+
+.comment-date {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.comment-text {
+    color: #cbd5e1;
+    font-size: 15px;
+}
+
+.reply-section {
+    margin-top: 30px;
+}
+
+.reply-header {
+    margin-bottom: 15px;
+    color: white;
+}
+
+.status-open {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+.status-escalated {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+}
+
+.status-closed {
+    background: rgba(100, 116, 139, 0.2);
+    color: #94a3b8;
+}
+
+.status-rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 100px;
+}

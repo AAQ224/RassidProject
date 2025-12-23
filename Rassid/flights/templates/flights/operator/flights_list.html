@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/flight_operator.css' %}">
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Flight Operations</h1>
+                <p>Manage your airport's departing flights</p>
+            </div>
+            <a href="{% url 'operator_fetch_flights' %}" class="btn-primary">
+                <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px;">sync</span>
+                Fetch DATA
+            </a>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <form method="GET" action="{% url 'operator_flights_list' %}"
+            style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="text" name="search" value="{{ search_query|default:'' }}" placeholder="Flight No..."
+                style="flex: 1; min-width: 150px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+
+            <select name="destination"
+                style="min-width: 150px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: white;">
+                <option value="">All Destinations</option>
+                {% for dest in destinations %}
+                <option value="{{ dest.id }}" {% if selected_destination==dest.id %}selected{% endif %}>
+                    {{ dest.city }} ({{ dest.code }})
+                </option>
+                {% endfor %}
+            </select>
+
+            <input type="date" name="date" value="{{ selected_date|default:'' }}"
+                style="min-width: 150px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+
+            <button type="submit" class="btn-primary" style="background: #0f172a;">Filter</button>
+
+            {% if search_query or selected_destination or selected_date %}
+            <a href="{% url 'operator_flights_list' %}"
+                style="display: flex; align-items: center; padding: 0 15px; background: #e2e8f0; color: #475569; border-radius: 8px; text-decoration: none;">
+                Clear
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="flights-table-container">
+        <table class="flights-table">
+            <thead>
+                <tr>
+                    <th>Flight No</th>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                    <th>Scheduled Departure</th>
+                    <th>Status</th>
+                    <th>Gate</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in flights %}
+                <tr>
+                    <td>
+                        <span class="flight-number">{{ flight.flightNumber }}</span>
+                    </td>
+                    <td>{{ flight.origin.city }} ({{ flight.origin.code }})</td>
+                    <td>{{ flight.destination.city }} ({{ flight.destination.code }})</td>
+                    <td>{{ flight.scheduledDeparture|date:"M d, H:i" }}</td>
+                    <td>
+                        <span class="status-badge status-{{ flight.status|lower }}">
+                            {{ flight.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% with gate=flight.gateassignment_set.first %}
+                        {% if gate %}
+                        {{ gate.gateCode }} ({{ gate.terminal }})
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <a href="{% url 'operator_edit_flight' flight.id %}" class="btn-action">
+                            Edit
+                        </a>
+                        <a href="{% url 'operator_passenger_list' flight.id %}" class="btn-action btn-secondary">
+                            Passengers
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No upcoming flights found for your airport.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 30px;">
+        <div class="dashboard-header" style="margin-bottom: 20px;">
+            <h1>Support Tickets</h1>
+            <p>Report issues directly to your airport administration</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div
+                style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <h3 style="margin-bottom: 20px; font-size: 1.25rem; font-weight: 600;">Create New Ticket</h3>
+                <form method="post" action="{% url 'create_ticket' %}">
+                    {% csrf_token %}
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Title</label>
+                        {{ ticket_form.title }}
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Category</label>
+                            {{ ticket_form.category }}
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Priority</label>
+                            {{ ticket_form.priority }}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Description</label>
+                        {{ ticket_form.description }}
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Submit
+                        Ticket</button>
+                </form>
+            </div>
+
+            <div
+                style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-height: 600px; overflow-y: auto;">
+                <h3 style="margin-bottom: 20px; font-size: 1.25rem; font-weight: 600;">My Recent Tickets</h3>
+                {% if my_tickets %}
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    {% for ticket in my_tickets %}
+                    <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; background: #fff;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 1.05em;">{{ ticket.title }}</div>
+                                <div style="font-size: 0.85em; color: #64748b;">
+                                    #{{ ticket.id }} • {{ ticket.createdAt|date:"M d, H:i" }}
+                                </div>
+                            </div>
+                            <span class="badge status-{{ ticket.status|lower }}"
+                                style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; font-weight: 600; {% if ticket.status == 'Open' %}background:#e0f2fe; color:#0284c7{% elif ticket.status == 'Escalated' %}background:#f3e8ff; color:#9333ea{% elif ticket.status == 'Rejected' %}background:#fee2e2; color:#dc2626{% else %}background:#f1f5f9; color:#475569{% endif %}">
+                                {{ ticket.status }}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 10px; font-size: 0.85em;">
+                            <span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px;">{{
+                                ticket.category }}</span>
+                            <span
+                                style="padding: 2px 8px; border-radius: 4px; background: {% if ticket.priority == 'High' %}#fee2e2; color:#ef4444{% else %}#f1f5f9; color:#475569{% endif %};">
+                                {{ ticket.priority }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: #94a3b8; text-align: center; margin-top: 50px;">No tickets found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

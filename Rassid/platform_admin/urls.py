@@ -16,6 +16,7 @@ urlpatterns = [
     path('users/<int:user_id>/reset-password/', views.admin_reset_password, name='admin_reset_password'),
     path('users/<int:user_id>/toggle-access/', views.admin_toggle_user_access, name='admin_toggle_user_access'),
     path('users/<int:user_id>/delete/', views.delete_user, name='admin_delete_user'),
+    path('ticket/<int:ticket_id>/', views.platform_ticket_detail, name='platform_ticket_detail'),
     path('tickets/<str:ticket_id>/close/', views.admin_close_ticket, name='admin_close_ticket'),
     path("subscriptions/", views.subscriptions, name="platform_admin_subscriptions"),
     path("system-errors/", views.system_errors, name="platform_admin_system_errors"),

@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/airports.css' %}">
+
 <section class="registration-page-wrapper">
 
     <div class="registration-card">
@@ -10,8 +12,7 @@
 
         {% if messages %}
         {% for message in messages %}
-        <div
-            style="padding: 15px; background: rgba(0, 242, 96, 0.1); border: 1px solid #00f260; color: #00f260; border-radius: 8px; margin-bottom: 20px;">
+        <div class="alert-success-custom">
             {{ message }}
         </div>
         {% endfor %}
@@ -20,8 +21,7 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <h3 style="color: #fff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">Airport
-                Information</h3>
+            <h3 class="form-section-header">Airport Information</h3>
             <div class="form-grid">
                 <div>
                     <label class="form-label">Airport Name</label>
@@ -41,50 +41,46 @@
                 </div>
             </div>
 
-            <h3
-                style="color: #fff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 30px;">
-                Contact Person</h3>
+            <h3 class="form-section-header form-section-header-top">Contact Person</h3>
             <div class="form-grid">
                 <div>
                     <label class="form-label">Admin Email</label>
                     {% if form.admin_email.errors %}
-                        <div style="color: #e74c3c; margin-bottom: 5px;">{{ form.admin_email.errors.0 }}</div>
+                    <div class="error-text">{{ form.admin_email.errors.0 }}</div>
                     {% endif %}
                     {{ form.admin_email }}
                 </div>
                 <div>
                     <label class="form-label">Phone Number</label>
                     {% if form.admin_phone.errors %}
-                        <div style="color: #e74c3c; margin-bottom: 5px;">{{ form.admin_phone.errors.0 }}</div>
+                    <div class="error-text">{{ form.admin_phone.errors.0 }}</div>
                     {% endif %}
                     {{ form.admin_phone }}
                 </div>
             </div>
 
-            <h3
-                style="color: #fff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 30px;">
-                Plan & Documents</h3>
+            <h3 class="form-section-header form-section-header-top">Plan & Documents</h3>
             <div style="margin-bottom: 20px;">
                 <label class="form-label">Selected Plan</label>
                 {{ form.selected_plan }}
             </div>
 
 
-            <div style="color: #e67e22; margin-bottom: 10px; font-size: 0.95em;">
+            <div class="form-note">
                 Note: If there is a validation error, you will need to re-select your files before submitting again.
             </div>
             <div class="form-grid">
                 <div>
                     <label class="form-label">Operating License (PDF/Img)</label>
                     {% if form.official_license.errors %}
-                        <div style="color: #e74c3c; margin-bottom: 5px;">{{ form.official_license.errors.0 }}</div>
+                    <div class="error-text">{{ form.official_license.errors.0 }}</div>
                     {% endif %}
                     {{ form.official_license }}
                 </div>
                 <div>
                     <label class="form-label">Commercial Record (Optional)</label>
                     {% if form.commercial_record.errors %}
-                        <div style="color: #e74c3c; margin-bottom: 5px;">{{ form.commercial_record.errors.0 }}</div>
+                    <div class="error-text">{{ form.commercial_record.errors.0 }}</div>
                     {% endif %}
                     {{ form.commercial_record }}
                 </div>
