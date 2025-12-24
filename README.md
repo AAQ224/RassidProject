@@ -230,3 +230,13 @@ Table:
 
 - Use Case<img width="970" height="1982" alt="IMG_3587" src="https://github.com/user-attachments/assets/ad7f35cf-ba33-4753-8cb0-3e105b264c3f" />
 - Sequence <img width="970" height="1204" alt="IMG_3585" src="https://github.com/user-attachments/assets/aa04b7fd-7524-45bf-b260-53051e2770ef" />
+
+
+# Team Members
+
+- Nawaf Alburaykan
+- Rakan Alyami
+- Abdulrahman Alqahtani
+- Ziyad Alzahrani
+
+**Supervisor:** Mr. Aqeel Alaid

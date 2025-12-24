@@ -1,3 +1,23 @@
+from .forms import AddAirportAdminForm
+from django.contrib import messages
+from django.shortcuts import redirect
+def add_airport_admin(request, id):
+    if not is_super_admin(request.user):
+        return redirect('public_home')
+    airport = get_object_or_404(Airport, id=id)
+    if request.method == 'POST':
+        form = AddAirportAdminForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.role = 'airport_admin'
+            user.airport_id = airport.id
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            messages.success(request, f"Admin {user.email} added successfully.")
+            return redirect('admin_airport_details', id=id)
+    else:
+        form = AddAirportAdminForm()
+    return render(request, 'platform_admin/add_airport_admin.html', {'form': form, 'airport': airport})
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages

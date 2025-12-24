@@ -21,6 +21,7 @@ def airports_list(request):
 def flights_list(request):
     from users.models import User
     from django.db.models import Q
+    from flights.models import GateAssignment
 
     # Get IDs of airports that have an admin (managed airports)
     managed_airport_ids = User.objects.filter(role='airport_admin').values_list('airport_id', flat=True).distinct()
