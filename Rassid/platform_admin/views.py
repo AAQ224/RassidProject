@@ -98,10 +98,13 @@ def admin_dashboard(request):
 
     tickets = Ticket.objects.filter(status__in=['Open', 'Escalated', 'In Progress']).order_by('-createdAt')[:5]
 
+    from airports.models import SubscriptionRequest
+    pending_requests_count = SubscriptionRequest.objects.filter(status='pending').count()
     context = {
         "stats": stats,
         "latest_airports": latest_airports,
-        "tickets": tickets
+        "tickets": tickets,
+        "pending_requests_count": pending_requests_count
     }
     return render(request, "platform_admin/dashboard.html", context)
 

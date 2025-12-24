@@ -69,6 +69,7 @@
             <div class="form-note">
                 Note: If there is a validation error, you will need to re-select your files before submitting again.
             </div>
+
             <div class="form-grid">
                 <div>
                     <label class="form-label">Operating License (PDF/Img)</label>
@@ -83,6 +84,13 @@
                     <div class="error-text">{{ form.commercial_record.errors.0 }}</div>
                     {% endif %}
                     {{ form.commercial_record }}
+                </div>
+                <div>
+                    <label class="form-label">Airport Image</label>
+                    {% if form.image.errors %}
+                    <div class="error-text">{{ form.image.errors.0 }}</div>
+                    {% endif %}
+                    {{ form.image }}
                 </div>
             </div>
 
