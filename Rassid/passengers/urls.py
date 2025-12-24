@@ -11,4 +11,5 @@ urlpatterns = [
     path("", include(router.urls)),
     path("tracking/", views.tracking, name="passengers_tracking"),
     path("track/<str:token>/", views.passenger_tracker, name="passenger_tracker"),
+    path("api/map-proxy/", views.map_proxy, name="map_proxy"),
 ]

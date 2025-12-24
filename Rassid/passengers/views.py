@@ -6,6 +6,27 @@ from .serializers import PassengerSerializer, PassengerFlightSerializer
 from users.permissions import IsAirportAdmin, IsOperator
 from django.utils import timezone
 from flights.models import FlightStatusHistory, GateAssignment
+import os
+import requests
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+# Placeholder mapping: User must verify Building/Floor IDs for KKIA.
+# Structure: Terminal Code -> {'building_id': X, 'default_floor_id': Y}
+TERMINAL_API_MAP = {
+    '1': {'building_id': '201', 'default_floor_id': '1'},  # Example IDs
+    '2': {'building_id': '202', 'default_floor_id': '1'},
+    '3': {'building_id': '203', 'default_floor_id': '1'},
+    '4': {'building_id': '204', 'default_floor_id': '1'},
+    '5': {'building_id': '205', 'default_floor_id': '1'},
+    'T1': {'building_id': '201', 'default_floor_id': '1'},
+    'T2': {'building_id': '202', 'default_floor_id': '1'},
+    'T3': {'building_id': '203', 'default_floor_id': '1'},
+    'T4': {'building_id': '204', 'default_floor_id': '1'},
+    'T5': {'building_id': '205', 'default_floor_id': '1'},
+}
+
+BASE_MAP_API_URL = "https://mapsapi.kkia.sa/api/public/v1/buildings"
 
 class PassengerViewSet(ModelViewSet):
     queryset = Passenger.objects.all()
@@ -86,6 +107,29 @@ def passenger_tracker(request, token):
         h, m = divmod(m, 60)
         return f"{h:02d}:{m:02d}"
 
+    
+    # Map Integration Logic
+    mapbox_token = os.getenv('MAPBOX_ACCESS_TOKEN', '')
+    
+    # Determine Building and Floor IDs based on Terminal
+    terminal_code = str(current_gate.terminal) if (current_gate and current_gate.terminal) else "5" # Default to T5
+    
+    # fallback for raw terminal string if not in GateAssignment
+    if not terminal_code and flight and flight.origin.code == 'RUH': 
+        # Logic to guess terminal from gate code if needed, but for now rely on GateAssignment
+        pass
+
+    # Clean terminal code (remove 'Terminal ' prefix if exists)
+    terminal_key = terminal_code.replace('Terminal ', '').strip()
+    
+    mapping = TERMINAL_API_MAP.get(terminal_key, TERMINAL_API_MAP['5']) # Default to T5
+    
+    building_id = mapping['building_id']
+    floor_id = mapping['default_floor_id']
+    
+    # Start URL for correct floor
+    # We will pass the IDs to the frontend so it can construct the Proxy URL
+    
     return render(request, "passengers/tracker.html", {
         "passenger": passenger,
         "flight": flight,
@@ -96,5 +140,30 @@ def passenger_tracker(request, token):
         "seconds_to_open": total_seconds_open,
         "seconds_to_close": total_seconds_close,
         "formatted_open": format_time(total_seconds_open),
-        "formatted_close": format_time(total_seconds_close)
+        "formatted_close": format_time(total_seconds_close),
+        "mapbox_access_token": mapbox_token,
+        "map_building_id": building_id,
+        "map_floor_id": floor_id,
+        "map_terminal_key": terminal_key,
     })
+
+@require_GET
+def map_proxy(request):
+    """
+    Proxy request to KKIA Maps API to avoid CORS.
+    Expects 'building_id' and 'floor_id' query params.
+    """
+    building_id = request.GET.get('building_id')
+    floor_id = request.GET.get('floor_id')
+    
+    if not building_id or not floor_id:
+        return JsonResponse({'error': 'Missing parameters'}, status=400)
+        
+    url = f"{BASE_MAP_API_URL}/{building_id}/floors/{floor_id}/pois"
+    
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        return JsonResponse(response.json(), safe=False)
+    except requests.RequestException as e:
+        return JsonResponse({'error': str(e)}, status=502)
