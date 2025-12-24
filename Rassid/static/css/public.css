@@ -242,34 +242,39 @@
 }
 
 .service-card {
-    background: #f8fafc;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
     padding: 40px 30px;
-    border-radius: 20px;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
+    border-radius: 22px;
+    transition: all 0.3s cubic-bezier(.4,2,.6,1);
+    border: 1.5px solid rgba(59,130,246,0.10);
+    box-shadow: 0 8px 32px 0 rgba(59,130,246,0.10), 0 1.5px 8px 0 rgba(0,0,0,0.04);
 }
 
 .service-card:hover {
-    background: #ffffff;
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-    border-color: #e2e8f0;
+    background: rgba(255,255,255,0.32);
+    transform: translateY(-10px) scale(1.04);
+    box-shadow: 0 24px 48px rgba(59,130,246,0.13), 0 2px 12px rgba(0,0,0,0.06);
+    border-color: #38bdf8;
 }
 
 .s-icon {
     width: 70px;
     height: 70px;
-    background: #eff6ff;
-    border-radius: 16px;
+    background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
+    box-shadow: 0 4px 16px 0 rgba(59,130,246,0.13);
 }
 
 .s-icon .material-symbols-outlined {
     font-size: 2.5rem;
-    color: #3b82f6;
+    color: #fff;
+    filter: drop-shadow(0 2px 8px rgba(59,130,246,0.18));
 }
 
 .service-card h3 {

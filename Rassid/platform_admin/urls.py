@@ -10,6 +10,7 @@ urlpatterns = [
     path("requests/<int:request_id>/reject/", views.reject_request, name="admin_reject_request"),
     path("airports/", views.airports, name="platform_admin_airports"),
     path("airports/<int:id>/", views.airport_details, name="admin_airport_details"),
+    path("airports/<int:id>/add-admin/", views.add_airport_admin, name="add_airport_admin"),
     path("airports/<int:id>/renew/", views.renew_subscription, name="renew_subscription"),
     path("airports/<int:id>/modify-plan/", views.modify_subscription_plan, name="modify_subscription_plan"),
     path("airports/<int:id>/toggle-status/", views.toggle_subscription_status, name="toggle_subscription_status"),
