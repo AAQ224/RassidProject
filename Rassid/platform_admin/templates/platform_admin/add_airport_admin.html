@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Add Airport Admin</h1>
+        <p>Create new administrator for {{ airport.name }}</p>
+    </div>
+</div>
+
 <div class="dashboard-container" style="max-width: 480px;">
     <div class="glass-card mb-5" style="padding: 36px 32px 28px 32px; box-shadow: 0 8px 32px 0 rgba(59,130,246,0.10);">
-        <div class="card-header" style="margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
-            <span class="material-symbols-outlined" style="font-size: 2.1rem; color: #2563eb; background: #e0e7ff; border-radius: 8px; padding: 6px;">person_add</span>
-            <h3 style="margin: 0; font-weight:700; letter-spacing:0.5px;">Add Airport Admin for <span style="color: #2563eb;">{{ airport.name }}</span></h3>
-        </div>
         <form method="post" style="margin-top: 10px;">
             {% csrf_token %}
             <div style="display: flex; flex-direction: column; gap: 18px;">
@@ -35,8 +38,10 @@
                 </div>
             </div>
             <div style="margin-top: 28px; display: flex; gap: 12px; justify-content: flex-end;">
-                <button type="submit" class="btn-action primary" style="min-width: 120px; font-size:1.08rem; letter-spacing:0.5px;">Add Admin</button>
-                <a href="{% url 'admin_airport_details' airport.id %}" class="btn-action" style="background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; font-size:1.08rem;">Cancel</a>
+                <button type="submit" class="btn-action primary"
+                    style="min-width: 120px; font-size:1.08rem; letter-spacing:0.5px;">Add Admin</button>
+                <a href="{% url 'admin_airport_details' airport.id %}" class="btn-action"
+                    style="background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; font-size:1.08rem;">Cancel</a>
             </div>
         </form>
     </div>
@@ -55,14 +60,16 @@
         transition: border 0.2s;
         box-shadow: none;
     }
+
     .input-wrap input:focus {
         border: 1.5px solid #2563eb;
         outline: none;
         background: #fff;
     }
+
     .glass-card.mb-5 {
         border: 1.5px solid #e0e7ef;
-        background: rgba(255,255,255,0.18);
+        background: rgba(255, 255, 255, 0.18);
         backdrop-filter: blur(10px) saturate(140%);
         -webkit-backdrop-filter: blur(10px) saturate(140%);
     }

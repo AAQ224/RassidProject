@@ -11,7 +11,6 @@
 
 <div class="dashboard-container">
 
-    <!-- TICKET TABLE -->
     <div class="glass-card">
         <div class="card-header border-bottom border-light border-opacity-10 py-3 px-4">
             <div class="d-flex align-items-center gap-2">
@@ -44,7 +43,7 @@
                 <tbody>
                     {% for ticket in tickets %}
                     <tr>
-                        <td class="ps-4 text-muted font-monospace">#{{ ticket.id }}</td>
+                        <td class="ps-4 font-monospace" style="color: rgba(255,255,255,0.7);">#{{ ticket.id }}</td>
                         <td>
                             <div class="fw-bold text-white">{{ ticket.title|truncatechars:30 }}</div>
                         </td>
@@ -71,10 +70,10 @@
                                 <div class="avatar-circle" style="width: 24px; height: 24px; font-size: 0.7rem;">
                                     {{ ticket.createdBy.username|slice:":1"|upper }}
                                 </div>
-                                <span class="small text-muted">{{ ticket.createdBy.username }}</span>
+                                <span class="small text-white-50">{{ ticket.createdBy.username }}</span>
                             </div>
                         </td>
-                        <td class="text-muted small">{{ ticket.createdAt|date:"M d" }}</td>
+                        <td class="small" style="color: rgba(255,255,255,0.8);">{{ ticket.createdAt|date:"M d" }}</td>
                         <td class="text-end pe-4">
                             <a href="{% url 'admin_ticket_detail' ticket.id %}" class="btn-icon btn-icon-edit"
                                 title="View Details">

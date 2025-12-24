@@ -12,8 +12,7 @@
                     <span class="badge status-{{ ticket.status|lower }}"
                         style="font-size: 0.5em; vertical-align: middle;">{{ ticket.status }}</span>
                 </h1>
-                <p>Reported by <strong>{{ ticket.createdBy.username }}</strong> on {{ ticket.createdAt|date:"M d, Y at
-                    H:i" }}</p>
+                <p>Reported by <strong>{{ ticket.createdBy.username }}</strong> on {{ ticket.createdAt|date:"M d, Y at H:i" }}</p>
             </div>
 
             {% if ticket.status == 'Open' %}
@@ -32,16 +31,13 @@
 
 <div class="container" style="margin-top: 30px; display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
 
-    <!-- Left Column: Details & Comments -->
     <div style="display: flex; flex-direction: column; gap: 30px;">
 
-        <!-- Description -->
         <div class="glass-card" style="padding: 25px;">
             <h3 style="margin-bottom: 15px; font-size: 1.1em;">Description</h3>
             <p style="line-height: 1.6; color: #334155;">{{ ticket.description }}</p>
         </div>
 
-        <!-- Comments / Timeline -->
         <div class="glass-card" style="padding: 25px;">
             <h3 style="margin-bottom: 20px; font-size: 1.1em;">Timeline & Notes</h3>
 
@@ -55,8 +51,7 @@
                     <div>
                         <div style="margin-bottom: 5px;">
                             <strong>{{ comment.user.username }}</strong>
-                            <span style="color: #94a3b8; font-size: 0.85em; margin-left: 8px;">{{
-                                comment.commentedAt|date:"M d, H:i" }}</span>
+                            <span style="color: #94a3b8; font-size: 0.85em; margin-left: 8px;">{{comment.commentedAt|date:"M d, H:i" }}</span>
                         </div>
                         <p style="color: #475569; margin: 0;">{{ comment.comment }}</p>
                     </div>

@@ -2,15 +2,16 @@
 {% load static %}
 
 {% block content %}
-<div class="container section-padding">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h1 class="text-gradient">Contact Messages</h1>
-            <p class="text-muted">View inquiries received from the Contact Us page.</p>
-        </div>
-        <div class="col-md-6 text-end">
-            <a href="{% url 'platform_dashboard' %}" class="btn-outline">Back to Dashboard</a>
-        </div>
+<div class="page-header">
+    <div class="container">
+        <h1>Contact Messages</h1>
+        <p>View inquiries received from the Contact Us page</p>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <div class="d-flex justify-content-end mb-4">
+        <a href="{% url 'platform_dashboard' %}" class="btn-outline">Back to Dashboard</a>
     </div>
 
     <div class="glass-card table-responsive">
@@ -40,7 +41,8 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'admin_message_details' msg.id %}" class="btn-sm btn-primary" style="text-decoration:none;">View</a>
+                        <a href="{% url 'admin_message_details' msg.id %}" class="btn-sm btn-primary"
+                            style="text-decoration:none;">View</a>
                     </td>
                 </tr>
                 {% empty %}
